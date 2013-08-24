@@ -3,6 +3,7 @@ package assets.recipehandler;
 import java.util.EnumSet;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,7 +40,7 @@ public class RecipeKeyHandler extends KeyHandler{
 			keyPressed = true;
 			if(Minecraft.getMinecraft()!=null && Minecraft.getMinecraft().thePlayer!=null)
 			{
-				EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+				EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 				if(Minecraft.getMinecraft().currentScreen instanceof GuiContainer && player.openContainer!=null)
 				{
 					InventoryCrafting craft = null;
@@ -60,8 +61,7 @@ public class RecipeKeyHandler extends KeyHandler{
 						ItemStack res = CraftingHandler.findMatchingRecipe(craft,Minecraft.getMinecraft().theWorld, recipeIndex);
 						if(res!=null && res!=oldItem)
 						{
-							result.setInventorySlotContents(0, res);
-							PacketHandler.sendData(player.username, res.itemID, res.stackSize, res.getItemDamage());
+							player.sendQueue.addToSendQueue(PacketHandler.getPacket(player.entityId, res.itemID, res.stackSize, res.getItemDamage()));
 							oldItem = res;
 						}
 					}
