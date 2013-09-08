@@ -42,7 +42,7 @@ public class PacketHandler implements IPacketHandler{
             return;
 		}
 		IInventory result = null;
-		if(player.entityId==data[3])
+		if(player.entityId==data[0])
 		{
 			if(player.openContainer instanceof ContainerPlayer)
 			{
@@ -55,7 +55,7 @@ public class PacketHandler implements IPacketHandler{
 		}
 		if(result != null)
 		{
-			result.setInventorySlotContents(0, new ItemStack(data[0],data[1],data[2]));
+			result.setInventorySlotContents(0, new ItemStack(data[1],data[2],data[3]));
 			if(player instanceof EntityPlayerMP)
 			{
 				((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
