@@ -1,8 +1,6 @@
 package assets.recipehandler;
 
 public class RecipeProxy {
-
-	public void register() 
-	{
+	public void register() {
 	}
 }
