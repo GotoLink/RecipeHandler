@@ -4,7 +4,6 @@ import java.util.EnumSet;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.ContainerWorkbench;
@@ -13,12 +12,13 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.network.PacketDispatcher;
 
 public class RecipeKeyHandler extends KeyHandler {
 	public static final String KEY_STRING = "RecipeSwitch";
+	public static final Minecraft mc = Minecraft.getMinecraft();
 	public int recipeIndex;
 	private ItemStack oldItem = null;
-	private boolean keyPressed;
 
 	public RecipeKeyHandler(int key) {
 		super(new KeyBinding[] { new KeyBinding(KEY_STRING, key) }, new boolean[] { true });
@@ -31,11 +31,10 @@ public class RecipeKeyHandler extends KeyHandler {
 
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
-		if (kb.keyDescription == KEY_STRING && tickEnd && !keyPressed) {
-			keyPressed = true;
-			if (Minecraft.getMinecraft() != null && Minecraft.getMinecraft().thePlayer != null) {
-				EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-				if (Minecraft.getMinecraft().currentScreen instanceof GuiContainer && player.openContainer != null) {
+		if (kb.keyDescription.equals(KEY_STRING) && tickEnd) {
+			if (mc != null && mc.thePlayer != null) {
+				EntityClientPlayerMP player = mc.thePlayer;
+				if (player.openContainer != null) {
 					InventoryCrafting craft = null;
 					IInventory result = null;
 					if (player.openContainer instanceof ContainerPlayer) {
@@ -46,10 +45,14 @@ public class RecipeKeyHandler extends KeyHandler {
 						result = ((ContainerWorkbench) player.openContainer).craftResult;
 					}
 					if (result != null) {
-						recipeIndex++;
-						ItemStack res = CraftingHandler.findMatchingRecipe(craft, Minecraft.getMinecraft().theWorld, recipeIndex);
-						if (res != null && res != oldItem) {
-							player.sendQueue.addToSendQueue(PacketHandler.getPacket(player.entityId, res.itemID, res.stackSize, res.getItemDamage()));
+						if (recipeIndex == Integer.MAX_VALUE) {
+							recipeIndex = 0;
+						} else {
+							recipeIndex++;
+						}
+						ItemStack res = CraftingHandler.findMatchingRecipe(craft, mc.theWorld, recipeIndex);
+						if (res != null && !res.areItemStacksEqual(res, oldItem)) {
+							PacketDispatcher.sendPacketToServer(PacketHandler.getPacket(player.entityId, res));
 							oldItem = res;
 						}
 					}
@@ -60,8 +63,6 @@ public class RecipeKeyHandler extends KeyHandler {
 
 	@Override
 	public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
-		if (kb.keyDescription == KEY_STRING && tickEnd)
-			keyPressed = false;
 	}
 
 	@Override
