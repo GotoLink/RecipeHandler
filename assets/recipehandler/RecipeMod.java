@@ -3,6 +3,7 @@ package assets.recipehandler;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
 
 import org.lwjgl.input.Keyboard;
 
@@ -34,5 +35,6 @@ public class RecipeMod {
 	@SideOnly(Side.CLIENT)
 	private void registerKey() {
 		KeyBindingRegistry.registerKeyBinding(new RecipeKeyHandler(Keyboard.KEY_ADD));
+		MinecraftForge.EVENT_BUS.register(new RenderHandler());
 	}
 }

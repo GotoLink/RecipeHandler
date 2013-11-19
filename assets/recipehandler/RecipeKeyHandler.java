@@ -7,7 +7,6 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.ContainerWorkbench;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
@@ -36,15 +35,12 @@ public class RecipeKeyHandler extends KeyHandler {
 				EntityClientPlayerMP player = mc.thePlayer;
 				if (player.openContainer != null) {
 					InventoryCrafting craft = null;
-					IInventory result = null;
 					if (player.openContainer instanceof ContainerPlayer) {
 						craft = ((ContainerPlayer) player.openContainer).craftMatrix;
-						result = ((ContainerPlayer) player.openContainer).craftResult;
 					} else if (player.openContainer instanceof ContainerWorkbench) {
 						craft = ((ContainerWorkbench) player.openContainer).craftMatrix;
-						result = ((ContainerWorkbench) player.openContainer).craftResult;
 					}
-					if (result != null) {
+					if (craft != null) {
 						if (recipeIndex == Integer.MAX_VALUE) {
 							recipeIndex = 0;
 						} else {
