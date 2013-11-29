@@ -47,7 +47,7 @@ public class RecipeKeyHandler extends KeyHandler {
 							recipeIndex++;
 						}
 						ItemStack res = CraftingHandler.findMatchingRecipe(craft, mc.theWorld, recipeIndex);
-						if (res != null && !res.areItemStacksEqual(res, oldItem)) {
+						if (res != null && !ItemStack.areItemStacksEqual(res, oldItem)) {
 							PacketDispatcher.sendPacketToServer(PacketHandler.getPacket(player.entityId, res));
 							oldItem = res;
 						}

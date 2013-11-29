@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public class CraftingHandler {
 	public static ItemStack findMatchingRecipe(InventoryCrafting craft, World world, int i) {
 		if (CraftingManager.getInstance().findMatchingRecipe(craft, world) != null) {
-			List result = getCraftResult(craft, world);
+			List<ItemStack> result = getCraftResult(craft, world);
 			if (result.size() == 0) {
 				return null;
 			}
@@ -32,9 +32,9 @@ public class CraftingHandler {
 		return null;
 	}
 
-	public static List getCraftResult(InventoryCrafting craft, World world) {
-		Iterator recipes = CraftingManager.getInstance().getRecipeList().iterator();
-		ArrayList arraylist = new ArrayList();
+	public static List<ItemStack> getCraftResult(InventoryCrafting craft, World world) {
+		Iterator<?> recipes = CraftingManager.getInstance().getRecipeList().iterator();
+		ArrayList<ItemStack> arraylist = new ArrayList<ItemStack>();
 		while (recipes.hasNext()) {
 			IRecipe irecipe = (IRecipe) recipes.next();
 			if (irecipe.matches(craft, world)) {
