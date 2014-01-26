@@ -1,0 +1,17 @@
+[
+{
+  "modid": "recipemod",
+  "name": "NoMoreRecipeConflict",
+  "description": "Switch between conflicting recipes",
+  "version": $version,
+  "credits": "",
+  "logoFile": "",
+  "mcversion": $mcversion,
+  "url": "http://www.minecraftforum.net/topic/1098727-",
+  "updateUrl": "",
+  "authors": ["stimmedcow","GotoLink"],
+  "parent":"",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -24,9 +24,9 @@ public class CraftingHandler {
 				if (j1 == result.size()) {
 					j1 = 0;
 				}
-				return (ItemStack) result.get(j1);
+				return result.get(j1);
 			} else {
-				return (ItemStack) result.get(i % result.size());
+				return result.get(i % result.size());
 			}
 		}
 		return null;
