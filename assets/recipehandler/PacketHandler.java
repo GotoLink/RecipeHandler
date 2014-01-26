@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 
 public class PacketHandler implements IMessageHandler<ChangePacket, ChangePacket>{
 
+    public PacketHandler(){}
     @Override
     public ChangePacket onMessage(ChangePacket message, MessageContext ctx) {
         if(ctx.side.isServer()){

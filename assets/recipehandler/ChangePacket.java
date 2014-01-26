@@ -10,6 +10,7 @@ public class ChangePacket implements IMessage {
     public ItemStack itemstack;
     Entity entity;
     public int entityId;
+    public ChangePacket(){}
     public ChangePacket(Entity entity, ItemStack stack) {
         this.entity = entity;
         this.itemstack = stack;
