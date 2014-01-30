@@ -20,9 +20,9 @@ minecraft {
     assetDir = "eclipse/assets"
 }
 archivesBaseName = "NoMoreRecipeConflict"
-version = "0.1"
-sourceSets.main.java{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , "*.*ml", ".*")}
-sourceSets.main.resources{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , "*.*ml", ".*")}
+version = "0.1(1.7.2)"
+sourceSets.main.java{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , ".*")}
+sourceSets.main.resources{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , ".*")}
 processResources {
     // replace stuff in mcmod.info, nothing else
     from(project.sourceSets.main.resources.srcDirs) {
@@ -34,4 +34,9 @@ processResources {
     from(project.sourceSets.main.resources.srcDirs) {
         include("assets/**", "pack.mcmeta")
     }
+}
+jar {
+//Keep the jar as clean as possible
+    includeEmptyDirs = false
+    include("assets/**", "pack.mcmeta", "mcmod.info")
 }

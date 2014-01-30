@@ -3,7 +3,8 @@ package assets.recipehandler;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
@@ -53,9 +54,9 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public void keyDown(InputEvent.KeyInputEvent event) {
-        if (key.func_151470_d()) {
-            if (mc != null && mc.thePlayer != null) {
+    public void keyDown(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && Keyboard.isKeyDown(key.func_151463_i())) {
+            if (mc!=null && mc.thePlayer != null) {
                 EntityClientPlayerMP player = mc.thePlayer;
                 if (player.openContainer != null) {
                     InventoryCrafting craft = null;
@@ -72,7 +73,7 @@ public class ClientEventHandler {
                         }
                         ItemStack res = CraftingHandler.findMatchingRecipe(craft, mc.theWorld, recipeIndex);
                         if (res != null && !ItemStack.areItemStacksEqual(res, oldItem)) {
-                            RecipeMod.networkWrapper.sendToServer(new ChangePacket(player, res));
+                            RecipeMod.networkWrapper.sendToServer(new ChangePacket(player, res).toProxy(Side.SERVER));
                             oldItem = res;
                         }
                     }
