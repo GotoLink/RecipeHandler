@@ -16,13 +16,13 @@ buildscript {
 }
 apply plugin: 'forge'
 minecraft {
-    version = "1.7.2-10.12.0.1019"
+    version = "1.7.2-10.12.0.1032"
     assetDir = "eclipse/assets"
 }
 archivesBaseName = "NoMoreRecipeConflict"
 version = "0.1(1.7.2)"
-sourceSets.main.java{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , ".*")}
-sourceSets.main.resources{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , ".*")}
+sourceSets.main.java{srcDirs project.projectDir.getPath() include("assets/**")}
+sourceSets.main.resources{srcDirs project.projectDir.getPath() include("assets/**", "*.info" , "*.mcmeta")}
 processResources {
     // replace stuff in mcmod.info, nothing else
     from(project.sourceSets.main.resources.srcDirs) {
@@ -32,11 +32,6 @@ processResources {
     }
     // copy everything else, thats not mcmod.info
     from(project.sourceSets.main.resources.srcDirs) {
-        include("assets/**", "pack.mcmeta")
+        include("*.lang", "pack.mcmeta")
     }
-}
-jar {
-//Keep the jar as clean as possible
-    includeEmptyDirs = false
-    include("assets/**", "pack.mcmeta", "mcmod.info")
 }

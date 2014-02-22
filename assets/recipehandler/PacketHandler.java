@@ -52,7 +52,7 @@ public class PacketHandler{
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
         ChangePacket pkt = new ChangePacket();
         pkt.fromBytes(event.packet.payload());
-        FMLProxyPacket packet = handle(((NetHandlerPlayServer) event.handler).field_147369_b.worldObj.getEntityByID(pkt.entityId), pkt.itemstack);
+        FMLProxyPacket packet = handle(((NetHandlerPlayServer) event.handler).playerEntity.worldObj.getEntityByID(pkt.entityId), pkt.itemstack);
         if(packet!=null){
             packet.setDispatcher(event.packet.getDispatcher());
             event.reply = packet;

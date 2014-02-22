@@ -55,7 +55,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void keyDown(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && Keyboard.isKeyDown(key.func_151463_i())) {
+        if (event.phase == TickEvent.Phase.START && key.getIsKeyPressed()) {
             if (mc!=null && mc.thePlayer != null) {
                 EntityClientPlayerMP player = mc.thePlayer;
                 if (player.openContainer != null) {
