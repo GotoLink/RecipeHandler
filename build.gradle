@@ -35,3 +35,8 @@ processResources {
         include("*.lang", "pack.mcmeta")
     }
 }
+jar {
+    //Keep the jar as clean as possible
+    includeEmptyDirs = false
+    exclude('*.java')
+}
