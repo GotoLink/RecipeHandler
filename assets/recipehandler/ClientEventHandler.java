@@ -19,7 +19,7 @@ import org.lwjgl.input.Keyboard;
 
 public class ClientEventHandler {
 	public static final Minecraft mc = Minecraft.getMinecraft();
-    public static final KeyBinding key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "special");
+    public static final KeyBinding key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "key.categories.gui");
     public int recipeIndex;
     private ItemStack oldItem = null;
 
