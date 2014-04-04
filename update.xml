@@ -1,0 +1,23 @@
+<mod modid="steamcraft">
+    <mcVersion version="1.7.2">
+        <release type="release" version="0.1"
+                 url="http://www.minecraftforum.net/topic/1651891-"
+                 download="http://www.mediafire.com/download/dnedj6pgzvf8yym/NoMoreRecipeConflict-0.1(1.7.2).jar"
+                 md5="39FDD448066C80F4C47A2BCCA515D062"
+                />
+    </mcVersion>
+	<mcVersion version="1.6.4">
+        <release type="release" version="0.1"
+                 url="http://www.minecraftforum.net/topic/1651891-"
+                 download="http://www.mediafire.com/download/jamqlthdmkpx4mm/NoMoreRecipeConflict_1.6.X.zip"
+                 md5="A9758CFC35B0A610CB79E7CFBC69858D"
+                />
+    </mcVersion>
+	<mcVersion version="1.5.2">
+        <release type="release" version="0.1"
+                 url="http://www.minecraftforum.net/topic/1651891-"
+                 download="http://www.mediafire.com/download/s0ecn8z866aurin/NoMoreRecipeConflict_1.5.X.zip"
+                 md5="50CE517BDEA17B78875630B939C78B46"
+                />
+    </mcVersion>
+</mod>

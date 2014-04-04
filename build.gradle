@@ -20,7 +20,7 @@ minecraft {
     assetDir = "eclipse/assets"
 }
 archivesBaseName = "NoMoreRecipeConflict"
-version = "0.1(1.7.2)"
+version = "0.1"
 sourceSets.main.java{srcDirs project.projectDir.getPath() include("assets/**")}
 sourceSets.main.resources{srcDirs project.projectDir.getPath() include("assets/**", "*.info" , "*.mcmeta")}
 processResources {
@@ -39,4 +39,7 @@ jar {
     //Keep the jar as clean as possible
     includeEmptyDirs = false
     exclude('*.java')
+    //Append with minecraft version
+    classifier = "("+minecraft.version+")"
+    archiveName = archivesBaseName + "-" + version + classifier+"."+extension
 }

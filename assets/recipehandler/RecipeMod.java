@@ -1,5 +1,7 @@
 package assets.recipehandler;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import net.minecraft.init.Blocks;
@@ -25,6 +27,16 @@ public class RecipeMod {
 		}
 		if (event.getSide().isClient()) {
 			registerKey();
+            if(event.getSourceFile().getName().endsWith(".jar")){
+                try {
+                    Class.forName("mods.mud.ModUpdateDetector").getDeclaredMethod("registerMod", ModContainer.class, String.class, String.class).invoke(null,
+                            FMLCommonHandler.instance().findContainerFor(this),
+                            "https://raw.github.com/GotoLink/RecipeHandler/master/update.xml",
+                            "https://raw.github.com/GotoLink/RecipeHandler/master/changelog.md"
+                    );
+                } catch (Throwable e) {
+                }
+            }
 		}
         networkWrapper = NetworkRegistry.INSTANCE.newEventDrivenChannel(ChangePacket.CHANNEL);
         networkWrapper.register(new PacketHandler());

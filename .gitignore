@@ -7,3 +7,6 @@
 !build.gradle
 !mcmod.info
 !pack.mcmeta
+!/gradle/
+!update.xml
+!changelog.md
