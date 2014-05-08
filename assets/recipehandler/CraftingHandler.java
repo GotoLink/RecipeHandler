@@ -1,16 +1,56 @@
 package assets.recipehandler;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 
 public class CraftingHandler {
+    private static HashMap<String, Field> knownCraftingContainer = new HashMap<String, Field>();
+    private static HashSet<String> notCraftingContainer = new HashSet<String>();
+
+    public static InventoryCrafting getCraftingMatrix(Container container){
+        if(container == null)
+            return null;
+        else if (container instanceof ContainerPlayer)
+            return ((ContainerPlayer) container).craftMatrix;
+        else if (container instanceof ContainerWorkbench)
+            return ((ContainerWorkbench) container).craftMatrix;
+        else {
+            String name = container.getClass().getName();
+            if (!notCraftingContainer.contains(name)) {
+                Field f = knownCraftingContainer.get(name);
+                if (f == null) {
+                    for (Field field : container.getClass().getDeclaredFields()) {
+                        if (field!=null && InventoryCrafting.class.isAssignableFrom(field.getClass())) {
+                            try {
+                                InventoryCrafting craft = InventoryCrafting.class.cast(field.get(container));
+                                if(craft!=null){
+                                    knownCraftingContainer.put(name, field);
+                                    return craft;
+                                }
+                            } catch (ReflectiveOperationException ref) {
+                                continue;
+                            }
+                        }
+                    }
+                    notCraftingContainer.add(name);
+                } else {
+                    try {
+                        return InventoryCrafting.class.cast(f.get(container));
+                    } catch (ReflectiveOperationException ref) {
+                        knownCraftingContainer.put(name, null);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 	public static ItemStack findMatchingRecipe(InventoryCrafting craft, World world, int i) {
 		if (CraftingManager.getInstance().findMatchingRecipe(craft, world) != null) {
 			List<ItemStack> result = getCraftResult(craft, world);
@@ -43,4 +83,26 @@ public class CraftingHandler {
 		}
 		return arraylist;
 	}
+
+    public static IInventory getResultSlot(Container container){
+        if(container == null)
+            return null;
+        else if (container instanceof ContainerPlayer)
+            return ((ContainerPlayer) container).craftResult;
+        else if (container instanceof ContainerWorkbench)
+            return ((ContainerWorkbench) container).craftResult;
+        else{
+            for(Field field:container.getClass().getDeclaredFields()){
+                if(field != null && IInventory.class.isAssignableFrom(field.getClass())){
+                    try {
+                        IInventory result = IInventory.class.cast(field.get(container));
+                        if (result.getSizeInventory() == 1) {
+                            return result;
+                        }
+                    }catch (ReflectiveOperationException ref){}
+                }
+            }
+        }
+        return null;
+    }
 }
