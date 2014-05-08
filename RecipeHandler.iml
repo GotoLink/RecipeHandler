@@ -49,7 +49,7 @@
     <orderEntry type="library" exported="" name="Gradle: netty-all-4.0.10.Final" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jinput-platform-2.0.5-natives-linux" level="project" />
     <orderEntry type="library" exported="" name="Gradle: scala-reflect-2.10.2" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: forgeSrc-1.7.2-10.12.0.1032" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: forgeSrc-1.7.2-10.12.1.1060" level="project" />
   </component>
 </module>
 
