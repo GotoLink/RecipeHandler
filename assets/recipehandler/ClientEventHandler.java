@@ -1,5 +1,6 @@
 package assets.recipehandler;
 
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -16,20 +17,26 @@ import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 
 public class ClientEventHandler {
-	public static final Minecraft mc = Minecraft.getMinecraft();
-    public static final KeyBinding key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "key.categories.gui");
+	private final Minecraft mc;
+    public final KeyBinding key;
     public int recipeIndex;
     private ItemStack oldItem = null;
 
     public ClientEventHandler() {
+        mc = FMLClientHandler.instance().getClient();
+        key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "key.categories.gui");
+    }
+
+    public void register(){
         ClientRegistry.registerKeyBinding(key);
+        MinecraftForge.EVENT_BUS.register(this);
+        FMLCommonHandler.instance().bus().register(this);
     }
 
 	@SubscribeEvent
 	public void onRenderGui(RenderGameOverlayEvent.Text event) {
 		if (mc.theWorld != null && mc.thePlayer != null) {
-			EntityClientPlayerMP player = mc.thePlayer;
-            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(player.openContainer);
+            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(mc.thePlayer.openContainer);
             if (craft != null) {
                 int result = CraftingHandler.getCraftResult(craft, mc.theWorld).size();
                 if (result > 1) {
@@ -39,15 +46,10 @@ public class ClientEventHandler {
 		}
 	}
 
-    public void register(){
-        MinecraftForge.EVENT_BUS.register(this);
-        FMLCommonHandler.instance().bus().register(this);
-    }
-
     @SubscribeEvent
     public void keyDown(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && key.getIsKeyPressed()) {
-            if (mc.theWorld != null && mc.thePlayer != null) {
+        if (event.phase == TickEvent.Phase.START && mc.theWorld != null && mc.thePlayer != null) {
+            if (Keyboard.isKeyDown(key.getKeyCode())) {
                 EntityClientPlayerMP player = mc.thePlayer;
                 InventoryCrafting craft = CraftingHandler.getCraftingMatrix(player.openContainer);
                 if (craft != null) {
