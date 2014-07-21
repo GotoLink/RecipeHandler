@@ -16,14 +16,17 @@ buildscript {
 }
 apply plugin: 'forge'
 minecraft {
-    version = "1.7.2-10.12.1.1060"
-    assetDir = "eclipse/assets"
+    version = "1.7.10-10.13.0.1184"
+    runDir = "eclipse/assets"
 }
 archivesBaseName = "NoMoreRecipeConflict"
 version = "0.1"
 sourceSets.main.java{srcDirs project.projectDir.getPath() include("assets/**")}
 sourceSets.main.resources{srcDirs project.projectDir.getPath() include("assets/**", "*.info" , "*.mcmeta")}
 processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
     // replace stuff in mcmod.info, nothing else
     from(project.sourceSets.main.resources.srcDirs) {
         include "mcmod.info"
