@@ -13,8 +13,9 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.common.config.Configuration;
 
-@Mod(modid = "recipemod", name = "NoMoreRecipeConflict", version = "0.1")
+@Mod(modid = "recipemod", name = "NoMoreRecipeConflict", useMetadata = true)
 public class RecipeMod {
 	private static final boolean debug = false;
     public static FMLEventChannel networkWrapper;
@@ -38,6 +39,12 @@ public class RecipeMod {
                 }
             }
 		}
+        try{
+            Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+            if(config.get(Configuration.CATEGORY_GENERAL, "Enable Custom Crafting Detection", true, "").getBoolean(false))
+                CraftingHandler.enableGuessing();
+            config.save();
+        }catch (Throwable t){}
         networkWrapper = NetworkRegistry.INSTANCE.newEventDrivenChannel(ChangePacket.CHANNEL);
         networkWrapper.register(new PacketHandler());
 	}

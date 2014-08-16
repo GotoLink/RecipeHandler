@@ -10,8 +10,13 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 
 public class CraftingHandler {
-    private static HashMap<String, Field> knownCraftingContainer = new HashMap<String, Field>();
-    private static HashSet<String> notCraftingContainer = new HashSet<String>();
+    private static HashMap<String, Field> knownCraftingContainer;
+    private static HashSet<String> notCraftingContainer;
+
+    public static void enableGuessing(){
+        knownCraftingContainer = new HashMap<String, Field>();
+        notCraftingContainer = new HashSet<String>();
+    }
 
     public static InventoryCrafting getCraftingMatrix(Container container){
         if(container == null)
@@ -20,7 +25,7 @@ public class CraftingHandler {
             return ((ContainerPlayer) container).craftMatrix;
         else if (container instanceof ContainerWorkbench)
             return ((ContainerWorkbench) container).craftMatrix;
-        else {
+        else if(notCraftingContainer!=null){
             String name = container.getClass().getName();
             if (!notCraftingContainer.contains(name)) {
                 Field f = knownCraftingContainer.get(name);
@@ -91,7 +96,7 @@ public class CraftingHandler {
             return ((ContainerPlayer) container).craftResult;
         else if (container instanceof ContainerWorkbench)
             return ((ContainerWorkbench) container).craftResult;
-        else{
+        else if(notCraftingContainer!=null){
             for(Field field:container.getClass().getDeclaredFields()){
                 if(field != null && IInventory.class.isAssignableFrom(field.getClass())){
                     try {
