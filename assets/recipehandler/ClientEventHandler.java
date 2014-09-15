@@ -7,41 +7,54 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
-public class ClientEventHandler {
+public class ClientEventHandler implements RecipeMod.IRegister{
 	private final Minecraft mc;
-    public final KeyBinding key;
-    public int recipeIndex;
+    private KeyBinding key;
+    private int recipeIndex;
     private ItemStack oldItem = null;
+    private boolean pressed = false;
 
     public ClientEventHandler() {
         mc = FMLClientHandler.instance().getClient();
-        key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "key.categories.gui");
     }
 
+    @Override
     public void register(){
-        ClientRegistry.registerKeyBinding(key);
-        MinecraftForge.EVENT_BUS.register(this);
-        FMLCommonHandler.instance().bus().register(this);
+        if(RecipeMod.switchKey) {
+            key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "key.categories.gui");
+            ClientRegistry.registerKeyBinding(key);
+            FMLCommonHandler.instance().bus().register(this);
+        }
+        if(RecipeMod.cycleButton)
+            MinecraftForge.EVENT_BUS.register(new GuiEventHandler());
+        if(RecipeMod.cornerText)
+            MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @Override
+    public EntityPlayer getPlayer(){
+        return mc.thePlayer;
     }
 
 	@SubscribeEvent
 	public void onRenderGui(RenderGameOverlayEvent.Text event) {
 		if (mc.theWorld != null && mc.thePlayer != null) {
-            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(mc.thePlayer.openContainer);
-            if (craft != null) {
-                int result = CraftingHandler.getCraftResult(craft, mc.theWorld).size();
-                if (result > 1) {
-                    event.right.add(StatCollector.translateToLocal("handler.found.text") + ": " + result);
-                }
+            int result = CraftingHandler.getNumberOfCraft(mc.thePlayer.openContainer, mc.theWorld);
+            if (result > 1) {
+                event.right.add(StatCollector.translateToLocal("handler.found.text") + ": " + result);
             }
 		}
 	}
@@ -50,20 +63,27 @@ public class ClientEventHandler {
     public void keyDown(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START && mc.theWorld != null && mc.thePlayer != null) {
             if (Keyboard.isKeyDown(key.getKeyCode())) {
-                EntityClientPlayerMP player = mc.thePlayer;
-                InventoryCrafting craft = CraftingHandler.getCraftingMatrix(player.openContainer);
-                if (craft != null) {
-                    if (recipeIndex == Integer.MAX_VALUE) {
-                        recipeIndex = 0;
-                    } else {
-                        recipeIndex++;
-                    }
-                    ItemStack res = CraftingHandler.findMatchingRecipe(craft, mc.theWorld, recipeIndex);
-                    if (res != null && !ItemStack.areItemStacksEqual(res, oldItem)) {
-                        RecipeMod.networkWrapper.sendToServer(new ChangePacket(player, res).toProxy(Side.SERVER));
-                        oldItem = res;
-                    }
+                if(!pressed) {
+                    pressed = true;
+                    pressed();
                 }
+            }else if (pressed)
+                pressed = false;
+        }
+    }
+
+    public void pressed() {
+        InventoryCrafting craft = CraftingHandler.getCraftingMatrix(mc.thePlayer.openContainer);
+        if (craft != null) {
+            if (recipeIndex == Integer.MAX_VALUE) {
+                recipeIndex = 0;
+            } else {
+                recipeIndex++;
+            }
+            ItemStack res = CraftingHandler.findMatchingRecipe(craft, mc.theWorld, recipeIndex);
+            if (res != null && !ItemStack.areItemStacksEqual(res, oldItem)) {
+                RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res).toProxy(Side.CLIENT));
+                oldItem = res;
             }
         }
     }

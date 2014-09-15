@@ -89,7 +89,7 @@ public class CraftingHandler {
 		return arraylist;
 	}
 
-    public static IInventory getResultSlot(Container container){
+    public static IInventory getResultSlot(Container container, int size){
         if(container == null)
             return null;
         else if (container instanceof ContainerPlayer)
@@ -101,7 +101,7 @@ public class CraftingHandler {
                 if(field != null && IInventory.class.isAssignableFrom(field.getClass())){
                     try {
                         IInventory result = IInventory.class.cast(field.get(container));
-                        if (result.getSizeInventory() == 1) {
+                        if (result.getSizeInventory() == size) {
                             return result;
                         }
                     }catch (ReflectiveOperationException ref){}
@@ -109,5 +109,13 @@ public class CraftingHandler {
             }
         }
         return null;
+    }
+
+    public static int getNumberOfCraft(Container container, World world){
+        InventoryCrafting craft = CraftingHandler.getCraftingMatrix(container);
+        if (craft != null)
+            return CraftingHandler.getCraftResult(craft, world).size();
+        else
+            return 0;
     }
 }

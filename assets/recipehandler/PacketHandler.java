@@ -2,55 +2,38 @@ package assets.recipehandler;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 
-public class PacketHandler{
+import java.util.Iterator;
 
-    @SideOnly(Side.CLIENT)
-    private void handle(ChangePacket packet) {
-        Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(packet.entityId);
-        if(ent instanceof EntityPlayer){
-            IInventory result = CraftingHandler.getResultSlot(((EntityPlayer) ent).openContainer);
-            if (result != null) {
-                result.setInventorySlotContents(0, packet.itemstack.copy());
-            }
-        }
+public class PacketHandler implements RecipeMod.IRegister {
+    @Override
+    public void register(){
     }
 
-    private FMLProxyPacket handle(Entity ent, ItemStack stack) {
-        if(ent instanceof EntityPlayer){
-            IInventory result = CraftingHandler.getResultSlot(((EntityPlayer) ent).openContainer);
-            if (result != null) {
-                result.setInventorySlotContents(0, stack.copy());
-                return new ChangePacket(ent, stack).toProxy(Side.CLIENT);
-            }
-        }
+    @Override
+    public EntityPlayer getPlayer(){
         return null;
-	}
+    }
 
     @SubscribeEvent
-    public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
-        ChangePacket pkt = new ChangePacket();
-        pkt.fromBytes(event.packet.payload());
-        FMLProxyPacket packet = handle(((NetHandlerPlayServer) event.handler).playerEntity.worldObj.getEntityByID(pkt.entityId), pkt.itemstack);
-        if(packet!=null){
-            packet.setDispatcher(event.packet.getDispatcher());
-            event.reply = packet;
+    public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event){
+        ChangePacket message = new ChangePacket().fromBytes(event.packet.payload());
+        IInventory result = CraftingHandler.getResultSlot(RecipeMod.registry.getPlayer().openContainer, message.slot+1);
+        if (result != null) {
+            result.setInventorySlotContents(message.slot, message.itemstack.copy());
         }
     }
 
     @SubscribeEvent
-    public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event) {
-        ChangePacket pkt = new ChangePacket();
-        pkt.fromBytes(event.packet.payload());
-        handle(pkt);
+    public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event){
+        ChangePacket reply = new ChangePacket().fromBytes(event.packet.payload()).handle(((NetHandlerPlayServer) event.handler).playerEntity);
+        if(reply != null) {
+            event.reply = reply.toProxy(Side.CLIENT);
+            event.reply.setDispatcher(event.packet.getDispatcher());
+        }
     }
 }
