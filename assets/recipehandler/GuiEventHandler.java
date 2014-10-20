@@ -29,7 +29,7 @@ public class GuiEventHandler {
     public static class CreativeButton extends GuiButton {
         private final ResourceLocation texture = new ResourceLocation("textures/gui/container/villager.png");
         private static final int WIDTH = 12, HEIGHT = WIDTH + 7;
-        private int timer = 0;
+        private int timer = 0, deltaX = 0;
         public CreativeButton(int id, int posX, int posY){
             super(id, posX-WIDTH-3, posY-2*HEIGHT, WIDTH, HEIGHT, "0");
         }
@@ -45,15 +45,12 @@ public class GuiEventHandler {
                     timer++;
                 GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                 mc.renderEngine.bindTexture(this.texture);
+                deltaX = mc.thePlayer.getActivePotionEffects().isEmpty() ? 0 : 60;
                 int k = 176;
                 if (!this.enabled)
                     k += this.width * 2;
-                else if(super.mousePressed(mc, mouseX, mouseY))
+                else if(super.mousePressed(mc, mouseX - deltaX, mouseY))
                     k += this.width;
-                int deltaX = 0;
-                if(!mc.thePlayer.getActivePotionEffects().isEmpty()){
-                    deltaX = 60;
-                }
                 this.drawTexturedModalRect(this.xPosition + deltaX, this.yPosition, k, 0, this.width, this.height);
                 if(!RecipeMod.cornerText) {
                     int l = this.enabled ? 0xFFFFFF : 10526880;
@@ -64,7 +61,7 @@ public class GuiEventHandler {
 
         @Override
         public boolean mousePressed (Minecraft mc, int mouseX, int mouseY){
-            boolean onButton = super.mousePressed(mc, mouseX, mouseY);
+            boolean onButton = super.mousePressed(mc, mouseX - deltaX, mouseY);
             if (onButton){
                 ((ClientEventHandler)RecipeMod.registry).pressed();
             }
