@@ -13,7 +13,6 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
-import net.minecraft.util.IRegistry;
 import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = "recipemod", name = "NoMoreRecipeConflict", useMetadata = true)
