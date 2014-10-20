@@ -33,7 +33,7 @@
     <orderEntry type="library" exported="" name="Gradle: log4j-core-2.0-beta9" level="project" />
     <orderEntry type="library" exported="" name="Gradle: netty-all-4.0.10.Final" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jinput-platform-2.0.5-natives-linux" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: forgeSrc-1.7.10-10.13.0.1184" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: forgeSrc-1.7.10-10.13.0.1208" level="project" />
     <orderEntry type="library" name="Gradle: lwjgl-2.9.1" level="project" />
   </component>
 </module>

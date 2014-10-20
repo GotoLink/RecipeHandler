@@ -50,10 +50,14 @@ public class GuiEventHandler {
                     k += this.width * 2;
                 else if(super.mousePressed(mc, mouseX, mouseY))
                     k += this.width;
-                this.drawTexturedModalRect(this.xPosition, this.yPosition, k, 0, this.width, this.height);
+                int deltaX = 0;
+                if(!mc.thePlayer.getActivePotionEffects().isEmpty()){
+                    deltaX = 60;
+                }
+                this.drawTexturedModalRect(this.xPosition + deltaX, this.yPosition, k, 0, this.width, this.height);
                 if(!RecipeMod.cornerText) {
                     int l = this.enabled ? 0xFFFFFF : 10526880;
-                    this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition, this.yPosition + this.height / 2, l);
+                    this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition + deltaX, this.yPosition + this.height / 2, l);
                 }
             }
         }
