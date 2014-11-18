@@ -12,6 +12,8 @@ import net.minecraft.world.World;
 public class CraftingHandler {
     private static HashMap<String, Field> knownCraftingContainer;
     private static HashSet<String> notCraftingContainer;
+    private static int previousNumberOfCraft;
+    private static int delayTimer = 10;
 
     public static void enableGuessing(){
         knownCraftingContainer = new HashMap<String, Field>();
@@ -38,8 +40,7 @@ public class CraftingHandler {
                                     knownCraftingContainer.put(name, field);
                                     return craft;
                                 }
-                            } catch (ReflectiveOperationException ref) {
-                                continue;
+                            } catch (ReflectiveOperationException ignored) {
                             }
                         }
                     }
@@ -104,7 +105,7 @@ public class CraftingHandler {
                         if (result.getSizeInventory() == size) {
                             return result;
                         }
-                    }catch (ReflectiveOperationException ref){}
+                    }catch (ReflectiveOperationException ignored){}
                 }
             }
         }
@@ -112,10 +113,15 @@ public class CraftingHandler {
     }
 
     public static int getNumberOfCraft(Container container, World world){
-        InventoryCrafting craft = CraftingHandler.getCraftingMatrix(container);
-        if (craft != null)
-            return CraftingHandler.getCraftResult(craft, world).size();
-        else
-            return 0;
+        if(delayTimer>20) {
+            delayTimer = 0;
+            InventoryCrafting craft = getCraftingMatrix(container);
+            if (craft != null)
+                previousNumberOfCraft = getCraftResult(craft, world).size();
+            else
+                previousNumberOfCraft = 0;
+        }else
+            delayTimer++;
+        return previousNumberOfCraft;
     }
 }
