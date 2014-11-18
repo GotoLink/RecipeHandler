@@ -15,8 +15,10 @@ buildscript {
     }
 }
 apply plugin: 'forge'
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 minecraft {
-    version = "1.7.10-10.13.0.1208"
+    version = "1.7.10-10.13.2.1230"
     runDir = "eclipse"
 }
 archivesBaseName = "NoMoreRecipeConflict"
