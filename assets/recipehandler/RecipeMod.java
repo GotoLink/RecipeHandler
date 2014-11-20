@@ -15,8 +15,8 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraftforge.common.config.Configuration;
 
-@Mod(modid = "recipemod", name = "NoMoreRecipeConflict", useMetadata = true)
-public class RecipeMod {
+@Mod(modid = "recipehandler", name = "NoMoreRecipeConflict", useMetadata = true)
+public final class RecipeMod {
     @SidedProxy(clientSide = "assets.recipehandler.ClientEventHandler", serverSide = "assets.recipehandler.PacketHandler")
     public static IRegister registry;
 	private static final boolean debug = false;

@@ -1,6 +1,6 @@
 [
 {
-  "modid": "recipemod",
+  "modid": "recipehandler",
   "name": "NoMoreRecipeConflict",
   "description": "Switch between conflicting recipes",
   "version": $version,
