@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack;
 
 import java.util.Iterator;
 
-public class ChangePacket {
+public final class ChangePacket {
     public final static String CHANNEL = "recipemod:key";
     public ItemStack itemstack;
     public int slot;

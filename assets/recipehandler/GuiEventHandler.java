@@ -14,7 +14,11 @@ import org.lwjgl.opengl.GL11;
 /**
  * Created by Olivier on 15/09/2014.
  */
-public class GuiEventHandler {
+public final class GuiEventHandler {
+    public static final GuiEventHandler INSTANCE = new GuiEventHandler();
+
+    private GuiEventHandler(){}
+
     @SuppressWarnings("unchecked")
     @SubscribeEvent
     public void onPostInitGui(GuiScreenEvent.InitGuiEvent.Post event){
@@ -28,7 +32,7 @@ public class GuiEventHandler {
         }
     }
 
-    public static class CreativeButton extends GuiButton {
+    public final class CreativeButton extends GuiButton {
         private final ResourceLocation texture = new ResourceLocation("textures/gui/container/villager.png");
         private static final int WIDTH = 12, HEIGHT = WIDTH + 7;
         private int deltaX = 0;

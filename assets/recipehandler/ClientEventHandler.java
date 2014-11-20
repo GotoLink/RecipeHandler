@@ -16,7 +16,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 
-public class ClientEventHandler implements RecipeMod.IRegister{
+public final class ClientEventHandler implements RecipeMod.IRegister{
     private KeyBinding key;
     private int recipeIndex;
     private ItemStack oldItem = null;
@@ -30,7 +30,7 @@ public class ClientEventHandler implements RecipeMod.IRegister{
             FMLCommonHandler.instance().bus().register(this);
         }
         if(RecipeMod.cycleButton)
-            MinecraftForge.EVENT_BUS.register(new GuiEventHandler());
+            MinecraftForge.EVENT_BUS.register(GuiEventHandler.INSTANCE);
         if(RecipeMod.cornerText)
             MinecraftForge.EVENT_BUS.register(this);
     }

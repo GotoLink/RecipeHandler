@@ -9,7 +9,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 
-public class CraftingHandler {
+public final class CraftingHandler {
     private static HashMap<String, Field> knownCraftingContainer;
     private static HashSet<String> notCraftingContainer;
     private static int previousNumberOfCraft;

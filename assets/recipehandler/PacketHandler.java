@@ -9,7 +9,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 
 import java.util.Iterator;
 
-public class PacketHandler implements RecipeMod.IRegister {
+public final class PacketHandler implements RecipeMod.IRegister {
     @Override
     public void register(){
     }
