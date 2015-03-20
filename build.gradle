@@ -20,9 +20,10 @@ targetCompatibility = 1.6
 minecraft {
     version = "1.7.10-10.13.2.1230"
     runDir = "eclipse"
+    replace '$version', version
 }
 archivesBaseName = "NoMoreRecipeConflict"
-version = "0.2"
+version = "0.3"
 sourceSets.main.java{srcDirs project.projectDir.getPath() include("assets/**")}
 sourceSets.main.resources{srcDirs project.projectDir.getPath() include("assets/**", "*.info" , "*.mcmeta")}
 processResources {
