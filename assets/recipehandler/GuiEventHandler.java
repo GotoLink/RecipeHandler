@@ -6,7 +6,6 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import org.lwjgl.opengl.GL11;
@@ -27,7 +26,7 @@ public final class GuiEventHandler {
             if (craft != null){
                 int guiLeft = (event.gui.width + 176) / 2;
                 int guiTop = (event.gui.height) / 2;
-                event.buttonList.add(new CreativeButton(event.buttonList.size()+2, guiLeft, guiTop));
+                event.buttonList.add(new CreativeButton(event.buttonList.size() + 2, guiLeft, guiTop));
             }
         }
     }

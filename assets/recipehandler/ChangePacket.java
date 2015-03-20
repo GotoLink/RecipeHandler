@@ -16,36 +16,38 @@ public final class ChangePacket {
     public final static String CHANNEL = "recipemod:key";
     public ItemStack itemstack;
     public int slot;
+    private int index;
     public ChangePacket(){}
-    public ChangePacket(int slot, ItemStack stack) {
+    public ChangePacket(int slot, ItemStack stack, int recipeIndex) {
         this.slot = slot;
         this.itemstack = stack;
+        this.index = recipeIndex;
     }
 
     public ChangePacket fromBytes(ByteBuf buf) {
         slot = buf.readInt();
         itemstack = ByteBufUtils.readItemStack(buf);
+        index = buf.readInt();
         return this;
     }
 
     public void toBytes(ByteBuf buf) {
         buf.writeInt(slot);
         ByteBufUtils.writeItemStack(buf, itemstack);
+        buf.writeInt(index);
     }
 
     ChangePacket handle(EntityPlayer player) {
-        if(itemstack!=null && slot>=0) {
+        if(itemstack != null && slot >= 0 && index >= 0) {
             InventoryCrafting crafting = CraftingHandler.getCraftingMatrix(player.openContainer);
             if(crafting!=null) {
-                Iterator<ItemStack> itr = CraftingHandler.getCraftResult(crafting, player.worldObj).iterator();
-                while(itr.hasNext()){
-                    if(ItemStack.areItemStacksEqual(itr.next(), itemstack)) {
-                        IInventory result = CraftingHandler.getResultSlot(player.openContainer, slot+1);
-                        if (result != null) {
-                            result.setInventorySlotContents(slot, itemstack.copy());
-                            return new ChangePacket(slot, itemstack);
-                        }
-                        break;
+                CraftingHandler.setRecipeIndex(index);
+                ItemStack itr = CraftingHandler.findMatchingRecipe(crafting, player.worldObj);
+                if(ItemStack.areItemStacksEqual(itr, itemstack)) {
+                    IInventory result = CraftingHandler.getResultSlot(player.openContainer, slot+1);
+                    if (result != null) {
+                        result.setInventorySlotContents(slot, itemstack.copy());
+                        return new ChangePacket(slot, itemstack, index);
                     }
                 }
             }

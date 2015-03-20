@@ -6,8 +6,10 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
@@ -15,10 +17,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 public final class ClientEventHandler implements RecipeMod.IRegister{
     private KeyBinding key;
-    private int recipeIndex;
     private ItemStack oldItem = null;
     private boolean pressed = false;
 
@@ -27,8 +29,8 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
         if(RecipeMod.switchKey) {
             key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "key.categories.gui");
             ClientRegistry.registerKeyBinding(key);
-            FMLCommonHandler.instance().bus().register(this);
         }
+        FMLCommonHandler.instance().bus().register(this);
         if(RecipeMod.cycleButton)
             MinecraftForge.EVENT_BUS.register(GuiEventHandler.INSTANCE);
         if(RecipeMod.cornerText)
@@ -40,7 +42,7 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
         return FMLClientHandler.instance().getClientPlayerEntity();
     }
 
-    private World getWorld(){
+    public static World getWorld(){
         return FMLClientHandler.instance().getWorldClient();
     }
 
@@ -56,28 +58,39 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
 
     @SubscribeEvent
     public void keyDown(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && getPlayer() != null) {
-            if (Keyboard.isKeyDown(key.getKeyCode())) {
-                if(!pressed) {
-                    pressed = true;
-                    pressed();
+        if (getPlayer() != null && FMLClientHandler.instance().getClient().currentScreen != null) {
+            if(event.phase == TickEvent.Phase.START && key != null) {
+                if (Keyboard.isKeyDown(key.getKeyCode())) {
+                    if (!pressed) {
+                        pressed = true;
+                        pressed();
+                    }
+                } else if (pressed)
+                    pressed = false;
+            }
+            if(event.phase == TickEvent.Phase.END && Mouse.isButtonDown(0) && GuiScreen.isShiftKeyDown()){//Shift click
+                IInventory result = CraftingHandler.getResultSlot(getPlayer().openContainer, 1);
+                if(result != null) {
+                    if(oldItem != null && !ItemStack.areItemStacksEqual(oldItem, result.getStackInSlot(0))){
+                        InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
+                        if(craft != null){
+                            ItemStack res = CraftingHandler.findMatchingRecipe(craft, getWorld());
+                            if(res != null){
+                                RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+                            }
+                        }
+                    }
                 }
-            }else if (pressed)
-                pressed = false;
+            }
         }
     }
 
     public void pressed() {
         InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
         if (craft != null) {
-            if (recipeIndex == Integer.MAX_VALUE) {
-                recipeIndex = 0;
-            } else {
-                recipeIndex++;
-            }
-            ItemStack res = CraftingHandler.findMatchingRecipe(craft, getWorld(), recipeIndex);
+            ItemStack res = CraftingHandler.findNextMatchingRecipe(craft, getWorld());
             if (res != null && !ItemStack.areItemStacksEqual(res, oldItem)) {
-                RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res).toProxy(Side.CLIENT));
+                RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
                 oldItem = res;
             }
         }

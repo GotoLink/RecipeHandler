@@ -14,10 +14,21 @@ public final class CraftingHandler {
     private static HashSet<String> notCraftingContainer;
     private static int previousNumberOfCraft;
     private static int delayTimer = 10;
+    private static int recipeIndex;
 
     public static void enableGuessing(){
         knownCraftingContainer = new HashMap<String, Field>();
         notCraftingContainer = new HashSet<String>();
+    }
+
+    public static int getRecipeIndex(){
+        return recipeIndex;
+    }
+
+    public static void setRecipeIndex(int id){
+        if(id>=0){
+            recipeIndex = id;
+        }
     }
 
     public static InventoryCrafting getCraftingMatrix(Container container){
@@ -35,6 +46,7 @@ public final class CraftingHandler {
                     for (Field field : container.getClass().getDeclaredFields()) {
                         if (field!=null && InventoryCrafting.class.isAssignableFrom(field.getClass())) {
                             try {
+                                field.setAccessible(true);
                                 InventoryCrafting craft = InventoryCrafting.class.cast(field.get(container));
                                 if(craft!=null){
                                     knownCraftingContainer.put(name, field);
@@ -57,14 +69,23 @@ public final class CraftingHandler {
         return null;
     }
 
-	public static ItemStack findMatchingRecipe(InventoryCrafting craft, World world, int i) {
+    public static ItemStack findNextMatchingRecipe(InventoryCrafting craft, World world) {
+        if (recipeIndex == Integer.MAX_VALUE) {
+            recipeIndex = 0;
+        } else {
+            recipeIndex++;
+        }
+        return findMatchingRecipe(craft, world);
+    }
+
+	public static ItemStack findMatchingRecipe(InventoryCrafting craft, World world) {
 		if (CraftingManager.getInstance().findMatchingRecipe(craft, world) != null) {
 			List<ItemStack> result = getCraftResult(craft, world);
 			if (result.size() == 0) {
 				return null;
 			}
-			if (i < 0) {
-				int j1 = -i;
+			if (recipeIndex < 0) {
+				int j1 = -recipeIndex;
 				j1 %= result.size();
 				j1 = result.size() - j1;
 				if (j1 == result.size()) {
@@ -72,7 +93,7 @@ public final class CraftingHandler {
 				}
 				return result.get(j1);
 			} else {
-				return result.get(i % result.size());
+				return result.get(recipeIndex % result.size());
 			}
 		}
 		return null;
@@ -101,8 +122,9 @@ public final class CraftingHandler {
             for(Field field:container.getClass().getDeclaredFields()){
                 if(field != null && IInventory.class.isAssignableFrom(field.getClass())){
                     try {
+                        field.setAccessible(true);
                         IInventory result = IInventory.class.cast(field.get(container));
-                        if (result.getSizeInventory() == size) {
+                        if (result!=null && result.getSizeInventory() == size) {
                             return result;
                         }
                     }catch (ReflectiveOperationException ignored){}

@@ -1,3 +1,7 @@
+== NoMoreRecipeConflict 0.3 ==
+* More custom crafting support ?
+* Keep crafting result selected on shift-click
+
 == NoMoreRecipeConflict 0.2 ==
 * Added cycle button in crafting gui (enabled by default)
 * Changed switch key to disabled by default
