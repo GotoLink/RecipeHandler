@@ -1,18 +1,18 @@
 package assets.recipehandler;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.ModContainer;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.network.FMLEventChannel;
-import cpw.mods.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.network.FMLEventChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = "recipehandler", name = "NoMoreRecipeConflict", version = "$version")
@@ -48,7 +48,8 @@ public final class RecipeMod {
             switchKey = config.get(Configuration.CATEGORY_GENERAL, "Enable Switch Key", switchKey, "Can be modified in controls menu").getBoolean();
             cycleButton = config.get(Configuration.CATEGORY_GENERAL, "Enable Cycle Button", cycleButton, "Rendered in the crafting GUI").getBoolean();
             cornerText = config.get(Configuration.CATEGORY_GENERAL, "Render Text Tooltip", cornerText, "Rendered in the Top Right Corner of the screen").getBoolean();
-            config.save();
+            if(config.hasChanged())
+                config.save();
         }catch (Throwable ignored){}
         registry.register();
         networkWrapper = NetworkRegistry.INSTANCE.newEventDrivenChannel(ChangePacket.CHANNEL);

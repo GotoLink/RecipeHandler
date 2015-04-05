@@ -1,6 +1,6 @@
 package assets.recipehandler;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -55,13 +55,13 @@ public final class GuiEventHandler {
                 this.drawTexturedModalRect(this.xPosition + deltaX, this.yPosition, k, 0, this.width, this.height);
                 if(!RecipeMod.cornerText) {
                     int l = this.enabled ? 0xFFFFFF : 10526880;
-                    this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition + deltaX, this.yPosition + this.height / 2, l);
+                    this.drawCenteredString(mc.fontRendererObj, this.displayString, this.xPosition + deltaX, this.yPosition + this.height / 2, l);
                 }
             }
         }
 
         @Override
-        public boolean mousePressed (Minecraft mc, int mouseX, int mouseY){
+        public boolean mousePressed(Minecraft mc, int mouseX, int mouseY){
             boolean onButton = super.mousePressed(mc, mouseX - deltaX, mouseY);
             if (onButton){
                 ((ClientEventHandler)RecipeMod.registry).pressed();

@@ -1,8 +1,9 @@
 package assets.recipehandler;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayer;
@@ -58,7 +59,7 @@ public final class ChangePacket {
     public FMLProxyPacket toProxy(Side side){
         ByteBuf buf = Unpooled.buffer();
         toBytes(buf);
-        FMLProxyPacket proxy = new FMLProxyPacket(buf, CHANNEL);
+        FMLProxyPacket proxy = new FMLProxyPacket(new PacketBuffer(buf), CHANNEL);
         proxy.setTarget(side);
         return proxy;
     }
