@@ -17,14 +17,14 @@ buildscript {
 apply plugin: 'forge'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
+archivesBaseName = "NoMoreRecipeConflict"
+version = "0.3"
 minecraft {
     version = "1.8-11.14.1.1350"
     runDir = "eclipse"
     mappings = "snapshot_20150401"
     replace '$version', version
 }
-archivesBaseName = "NoMoreRecipeConflict"
-version = "0.3"
 sourceSets.main.java{srcDirs project.projectDir.getPath() include("assets/**")}
 sourceSets.main.resources{srcDirs project.projectDir.getPath() include("assets/**", "*.info" , "*.mcmeta")}
 processResources {
