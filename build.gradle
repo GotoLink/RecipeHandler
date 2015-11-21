@@ -20,7 +20,7 @@ targetCompatibility = 1.6
 archivesBaseName = "NoMoreRecipeConflict"
 version = "0.3"
 minecraft {
-    version = "1.8-11.14.1.1350"
+    version = "1.8-11.14.3.1450"
     runDir = "eclipse"
     mappings = "snapshot_20150401"
     replace '$version', version
