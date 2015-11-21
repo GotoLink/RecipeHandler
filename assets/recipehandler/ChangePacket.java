@@ -57,9 +57,9 @@ public final class ChangePacket {
     }
 
     public FMLProxyPacket toProxy(Side side){
-        ByteBuf buf = Unpooled.buffer();
+        PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
         toBytes(buf);
-        FMLProxyPacket proxy = new FMLProxyPacket(new PacketBuffer(buf), CHANNEL);
+        FMLProxyPacket proxy = new FMLProxyPacket(buf, CHANNEL);
         proxy.setTarget(side);
         return proxy;
     }
