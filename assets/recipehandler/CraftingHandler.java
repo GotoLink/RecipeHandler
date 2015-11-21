@@ -52,7 +52,7 @@ public final class CraftingHandler {
                                     knownCraftingContainer.put(name, field);
                                     return craft;
                                 }
-                            } catch (ReflectiveOperationException ignored) {
+                            } catch (Exception ignored) {
                             }
                         }
                     }
@@ -60,7 +60,7 @@ public final class CraftingHandler {
                 } else {
                     try {
                         return InventoryCrafting.class.cast(f.get(container));
-                    } catch (ReflectiveOperationException ref) {
+                    } catch (Exception ref) {
                         knownCraftingContainer.put(name, null);
                     }
                 }
@@ -127,7 +127,7 @@ public final class CraftingHandler {
                         if (result!=null && result.getSizeInventory() == size) {
                             return result;
                         }
-                    }catch (ReflectiveOperationException ignored){}
+                    }catch (Exception ignored){}
                 }
             }
         }
