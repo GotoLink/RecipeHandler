@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.common.config.Configuration;
 
-@Mod(modid = "recipehandler", name = "NoMoreRecipeConflict", version = "$version")
+@Mod(modid = "recipehandler", name = "NoMoreRecipeConflict", version = "$version", acceptedMinecraftVersions = "&mcversion")
 public final class RecipeMod {
     @SidedProxy(clientSide = "assets.recipehandler.ClientEventHandler", serverSide = "assets.recipehandler.PacketHandler")
     public static IRegister registry;
@@ -43,11 +43,11 @@ public final class RecipeMod {
 		}
         try{
             Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-            if(config.get(Configuration.CATEGORY_GENERAL, "Enable Custom Crafting Detection", true, "Tries do detect other crafting systems, disable for less processing").getBoolean())
+            if(config.getBoolean("Enable Custom Crafting Detection", Configuration.CATEGORY_GENERAL, true, "Tries do detect other crafting systems, disable for less processing"))
                 CraftingHandler.enableGuessing();
-            switchKey = config.get(Configuration.CATEGORY_GENERAL, "Enable Switch Key", switchKey, "Can be modified in controls menu").getBoolean();
-            cycleButton = config.get(Configuration.CATEGORY_GENERAL, "Enable Cycle Button", cycleButton, "Rendered in the crafting GUI").getBoolean();
-            cornerText = config.get(Configuration.CATEGORY_GENERAL, "Render Text Tooltip", cornerText, "Rendered in the Top Right Corner of the screen").getBoolean();
+            switchKey = config.getBoolean("Enable Switch Key", Configuration.CATEGORY_GENERAL, switchKey, "Can be modified in controls menu");
+            cycleButton = config.getBoolean("Enable Cycle Button", Configuration.CATEGORY_GENERAL, cycleButton, "Rendered in the crafting GUI");
+            cornerText = config.getBoolean("Render Text Tooltip", Configuration.CATEGORY_GENERAL, cornerText, "Rendered in the Top Right Corner of the screen");
             if(config.hasChanged())
                 config.save();
         }catch (Throwable ignored){}
@@ -57,7 +57,7 @@ public final class RecipeMod {
 	}
 
     interface IRegister{
-        public void register();
-        public EntityPlayer getPlayer();
+        void register();
+        EntityPlayer getPlayer();
     }
 }

@@ -1,9 +1,16 @@
 <mod modid="recipemod">
+    <mcVersion version="1.8.9">
+        <release type="release" version="0.3"
+                 url="http://www.minecraftforum.net/topic/1651891-/#RecipeHandler"
+                 download="http://www.mediafire.com/download/nluvkpa05tevhdt/NoMoreRecipeConflict-0.3(1.8.X).jar"
+                 md5="1BAD8D4F7EE06D74CCD32A6C347EFE0A"
+                />
+    </mcVersion>
     <mcVersion version="1.8">
         <release type="release" version="0.3"
                  url="http://www.minecraftforum.net/topic/1651891-/#RecipeHandler"
                  download="http://www.mediafire.com/download/d8dagkota7ahzan/NoMoreRecipeConflict-0.3(1.8).jar"
-                 md5="B8D556AFCA69870C407804A3CC384E29"
+                 md5="3EA66EFEAF98684276D2E65FDAA1677D"
                 />
     </mcVersion>
     <mcVersion version="1.7.10">

@@ -3,15 +3,9 @@
   "modid": "recipehandler",
   "name": "NoMoreRecipeConflict",
   "description": "Switch between conflicting recipes",
-  "version": $version,
-  "credits": "",
-  "logoFile": "",
-  "mcversion": $mcversion,
+  "version": "$version",
+  "mcversion": "$mcversion",
   "url": "http://www.minecraftforum.net/topic/1098727-",
-  "updateUrl": "",
-  "authorList": ["stimmedcow","GotoLink"],
-  "parent":"",
-  "screenshots": [],
-  "dependencies": []
+  "authorList": ["stimmedcow","GotoLink"]
 }
 ]

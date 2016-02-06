@@ -1,6 +1,6 @@
 {
    "pack":{
       "pack_format":1,
-      "description":"NoMoreRecipeConflict for 1.7.2"
+      "description":"NoMoreRecipeConflict for $mcversion"
    }
 }

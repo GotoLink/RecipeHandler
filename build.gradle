@@ -1,51 +1,33 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-    }
+plugins {
+    id "net.minecraftforge.gradle.forge" version "2.0.2"
 }
-apply plugin: 'forge'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 archivesBaseName = "NoMoreRecipeConflict"
 version = "0.3"
 minecraft {
-    version = "1.8-11.14.3.1450"
+    version = "1.8-11.14.4.1563"
     runDir = "eclipse"
     mappings = "snapshot_20150401"
-    replace '$version', version
+    replace '$version', project.version
+    replace '$mcversion', "[1.8,)"
+	makeObfSourceJar = false
 }
-sourceSets.main.java{srcDirs project.projectDir.getPath() include("assets/**")}
-sourceSets.main.resources{srcDirs project.projectDir.getPath() include("assets/**", "*.info" , "*.mcmeta")}
+sourceSets.main.java{srcDirs '.' include('assets/')}
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
-    // replace stuff in mcmod.info, nothing else
-    from(project.sourceSets.main.resources.srcDirs) {
-        include "mcmod.info"
+    // replace stuff in mcmod.info
+    from(['mcmod.info', 'pack.mcmeta']) {
         // replace version and mcversion
-        expand([version:project.version, mcversion:project.minecraft.version])
+        expand([version:project.version, mcversion: "[1.8,)"])
     }
-    // copy everything else, thats not mcmod.info
-    from(project.sourceSets.main.resources.srcDirs) {
-        include("*.lang", "pack.mcmeta")
-    }
+	from(fileTree('.').matching{ include('assets/**/*.lang')})
 }
-jar {
+jar{
     //Keep the jar as clean as possible
     includeEmptyDirs = false
-    exclude('*.java')
     //Append with minecraft version
     classifier = "("+minecraft.version+")"
     archiveName = archivesBaseName + "-" + version + classifier+"."+extension
