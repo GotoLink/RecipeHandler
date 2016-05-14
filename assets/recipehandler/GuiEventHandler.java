@@ -10,23 +10,19 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import org.lwjgl.opengl.GL11;
 
-/**
- * Created by Olivier on 15/09/2014.
- */
 public final class GuiEventHandler {
     public static final GuiEventHandler INSTANCE = new GuiEventHandler();
 
     private GuiEventHandler(){}
 
-    @SuppressWarnings("unchecked")
     @SubscribeEvent
     public void onPostInitGui(GuiScreenEvent.InitGuiEvent.Post event){
-        if(event.gui instanceof GuiContainer){
-            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(((GuiContainer) event.gui).inventorySlots);
+        if(event.getGui() instanceof GuiContainer){
+            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(((GuiContainer) event.getGui()).inventorySlots);
             if (craft != null){
-                int guiLeft = (event.gui.width + 176) / 2;
-                int guiTop = (event.gui.height) / 2;
-                event.buttonList.add(new CreativeButton(event.buttonList.size() + 2, guiLeft, guiTop));
+                int guiLeft = (event.getGui().width + 176) / 2;
+                int guiTop = (event.getGui().height) / 2;
+                event.getButtonList().add(new CreativeButton(event.getButtonList().size() + 2, guiLeft + RecipeMod.xOffset, guiTop + RecipeMod.yOffset));
             }
         }
     }

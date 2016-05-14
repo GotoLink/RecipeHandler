@@ -1,16 +1,30 @@
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+    }
 }
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+/*plugins {
+    id "net.minecraftforge.gradle.forge" version "2.0.2"
+}*/
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 archivesBaseName = "NoMoreRecipeConflict"
-version = "0.3"
+version = "0.4"
 minecraft {
-    version = "1.8-11.14.4.1563"
+    version = "1.9-12.16.1.1904"
     runDir = "eclipse"
-    mappings = "snapshot_20150401"
+    mappings = "snapshot_20160312"
     replace '$version', project.version
-    replace '$mcversion', "[1.8,)"
+    replace '$mcversion', "[1.9,)"
 	makeObfSourceJar = false
 }
 sourceSets.main.java{srcDirs '.' include('assets/')}
@@ -21,7 +35,7 @@ processResources {
     // replace stuff in mcmod.info
     from(['mcmod.info', 'pack.mcmeta']) {
         // replace version and mcversion
-        expand([version:project.version, mcversion: "[1.8,)"])
+        expand([version:project.version, mcversion: "[1.9,)"])
     }
 	from(fileTree('.').matching{ include('assets/**/*.lang')})
 }

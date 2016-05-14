@@ -21,7 +21,7 @@ public final class PacketHandler implements RecipeMod.IRegister {
 
     @SubscribeEvent
     public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event){
-        ChangePacket message = new ChangePacket().fromBytes(event.packet.payload());
+        ChangePacket message = new ChangePacket().fromBytes(event.getPacket().payload());
         IInventory result = CraftingHandler.getResultSlot(RecipeMod.registry.getPlayer().openContainer, message.slot+1);
         if (result != null) {
             result.setInventorySlotContents(message.slot, message.itemstack.copy());
@@ -30,10 +30,10 @@ public final class PacketHandler implements RecipeMod.IRegister {
 
     @SubscribeEvent
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event){
-        ChangePacket reply = new ChangePacket().fromBytes(event.packet.payload()).handle(((NetHandlerPlayServer) event.handler).playerEntity);
+        ChangePacket reply = new ChangePacket().fromBytes(event.getPacket().payload()).handle(((NetHandlerPlayServer) event.getHandler()).playerEntity);
         if(reply != null) {
-            event.reply = reply.toProxy(Side.CLIENT);
-            event.reply.setDispatcher(event.packet.getDispatcher());
+            event.setReply(reply.toProxy(Side.CLIENT));
+            event.getReply().setDispatcher(event.getPacket().getDispatcher());
         }
     }
 }

@@ -1,5 +1,6 @@
 package assets.recipehandler;
 
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -22,6 +23,7 @@ public final class RecipeMod {
 	private static final boolean debug = false;
     public static FMLEventChannel networkWrapper;
     public static boolean switchKey = false, cycleButton = true, cornerText = false;
+    public static int xOffset = 0, yOffset = 0;
 
 	@EventHandler
 	public void loading(FMLPreInitializationEvent event) {
@@ -48,6 +50,14 @@ public final class RecipeMod {
             switchKey = config.getBoolean("Enable Switch Key", Configuration.CATEGORY_GENERAL, switchKey, "Can be modified in controls menu");
             cycleButton = config.getBoolean("Enable Cycle Button", Configuration.CATEGORY_GENERAL, cycleButton, "Rendered in the crafting GUI");
             cornerText = config.getBoolean("Render Text Tooltip", Configuration.CATEGORY_GENERAL, cornerText, "Rendered in the Top Right Corner of the screen");
+            if(cycleButton){
+                Property property = config.get(Configuration.CATEGORY_CLIENT, "Cycle Button Horizontal Offset", 0);
+                property.setComment("Offset for button from its default position, negative values to the left, positive to the right [default: 0]");
+                xOffset = property.getInt();
+                property = config.get(Configuration.CATEGORY_CLIENT, "Cycle Button Vertical Offset", 0);
+                property.setComment("Offset for button from its default position, negative values to under, positive to over [default: 0]");
+                yOffset = property.getInt();
+            }
             if(config.hasChanged())
                 config.save();
         }catch (Throwable ignored){}

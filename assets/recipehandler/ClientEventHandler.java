@@ -1,5 +1,7 @@
 package assets.recipehandler;
 
+import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -12,7 +14,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,14 +28,12 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
     @Override
     public void register(){
         if(RecipeMod.switchKey) {
-            key = new KeyBinding("RecipeSwitch", Keyboard.KEY_ADD, "key.categories.gui");
+            key = new KeyBinding("RecipeSwitch", KeyConflictContext.GUI, Keyboard.KEY_ADD, "key.categories.gui");
             ClientRegistry.registerKeyBinding(key);
         }
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
         if(RecipeMod.cycleButton)
             MinecraftForge.EVENT_BUS.register(GuiEventHandler.INSTANCE);
-        if(RecipeMod.cornerText)
-            MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Override
@@ -48,10 +47,10 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
 
 	@SubscribeEvent
 	public void onRenderGui(RenderGameOverlayEvent.Text event) {
-		if (getPlayer() != null) {
+		if (getPlayer() != null && RecipeMod.cornerText) {
             int result = CraftingHandler.getNumberOfCraft(getPlayer().openContainer, getWorld());
             if (result > 1) {
-                event.right.add(StatCollector.translateToLocalFormatted("handler.found.text", result));
+                event.getRight().add(I18n.translateToLocalFormatted("handler.found.text", result));
             }
 		}
 	}

@@ -1,3 +1,7 @@
+== NoMoreRecipeConflict 0.4 ==
+* Added config options to offset the cycle button
+* Made the switch keybind support Forge conflict handler
+
 == NoMoreRecipeConflict 0.3 ==
 * More custom crafting support ?
 * Keep crafting result selected on shift-click
