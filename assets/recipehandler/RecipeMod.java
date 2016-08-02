@@ -28,8 +28,8 @@ public final class RecipeMod {
 	@EventHandler
 	public void loading(FMLPreInitializationEvent event) {
 		if (debug) {
-			GameRegistry.addShapelessRecipe(new ItemStack(Items.golden_apple), Blocks.planks, Items.stick);
-			GameRegistry.addShapelessRecipe(new ItemStack(Items.apple), Blocks.planks, Items.stick);
+			GameRegistry.addShapelessRecipe(new ItemStack(Items.GOLDEN_APPLE), Blocks.PLANKS, Items.STICK);
+			GameRegistry.addShapelessRecipe(new ItemStack(Items.APPLE), Blocks.PLANKS, Items.STICK);
 		}
 		if (event.getSide().isClient()) {
             if(event.getSourceFile().getName().endsWith(".jar")){

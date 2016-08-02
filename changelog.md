@@ -1,3 +1,7 @@
+== NoMoreRecipeConflict 0.5 ==
+* Better support in potion effect shift
+* Fixed custom crafting table support
+
 == NoMoreRecipeConflict 0.4 ==
 * Added config options to offset the cycle button
 * Made the switch keybind support Forge conflict handler

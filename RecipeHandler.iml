@@ -92,6 +92,17 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.1/f7be08ec23c21485b9b5a1cf1654c2ec8c58168d/jsr305-3.0.1.jar!/"/>
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.1/3d7ec36bbfbf5d7259356a6b8fec0ce4f96e3f47/jsr305-3.0.1-javadoc.jar!/"/>
+        </JAVADOC>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/com.mojang/netty/1.6/4b75825a06139752bd800d9e29c5fd55b8b1b1e4/netty-1.6.jar!/"/>
         </CLASSES>
         <JAVADOC/>
@@ -258,7 +269,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/com.mojang/realms/1.8.7/b624280016616bb56cc6c30282684322edc7e7eb/realms-1.8.7.jar!/"/>
+          <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/com.mojang/realms/1.9.3/b291425bf7ef763452eaa894575018706339f72b/realms-1.9.3.jar!/"/>
         </CLASSES>
         <JAVADOC/>
         <SOURCES/>
@@ -314,6 +325,15 @@
         <SOURCES>
           <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.3.2/4809f38359edeea9487f747e09aa58ec8d3a54c5/httpcore-4.3.2-sources.jar!/"/>
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/it.unimi.dsi/fastutil/7.0.12_mojang/ba787e741efdc425fc5d2ea654b57c15fba27efa/fastutil-7.0.12_mojang.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -691,15 +711,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/2.0.1/516c03b21d50a644d538de0f0369c620989cd8f0/jsr305-2.0.1.jar!/"/>
-        </CLASSES>
-        <JAVADOC/>
-        <SOURCES/>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://E:/Modding/Caches/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl-platform/2.9.4-nightly-20150209/b84d5102b9dbfabfeb5e43c7e2828d98a7fc80e0/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar!/"/>
         </CLASSES>
         <JAVADOC/>
@@ -727,16 +738,18 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://E:/Modding/Caches/.gradle/caches/minecraft/net/minecraftforge/forge/1.9-12.16.1.1904/snapshot/20160312/forgeBin-1.9-12.16.1.1904.jar!/"/>
+          <root url="jar://E:/Modding/Caches/.gradle/caches/minecraft/net/minecraftforge/forge/1.10.2-12.18.1.2044/snapshot/20160801/forgeSrc-1.10.2-12.18.1.2044.jar!/"/>
         </CLASSES>
         <JAVADOC/>
-        <SOURCES/>
+        <SOURCES>
+          <root url="jar://E:/Modding/Caches/.gradle/caches/minecraft/net/minecraftforge/forge/1.10.2-12.18.1.2044/snapshot/20160801/forgeSrc-1.10.2-12.18.1.2044-sources.jar!/"/>
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="RUNTIME">
       <library>
         <CLASSES>
-          <root url="file://E:/Modding/Caches/.gradle/caches/minecraft/net/minecraftforge/forge/1.9-12.16.1.1904/start"/>
+          <root url="file://E:/Modding/Caches/.gradle/caches/minecraft/net/minecraftforge/forge/1.10.2-12.18.1.2044/start"/>
         </CLASSES>
         <JAVADOC/>
         <SOURCES/>

@@ -1,13 +1,13 @@
 package assets.recipehandler;
 
-import java.lang.reflect.Field;
-import java.util.*;
-
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
+
+import java.lang.reflect.Field;
+import java.util.*;
 
 public final class CraftingHandler {
     private static HashMap<String, Field> knownCraftingContainer;
@@ -44,13 +44,13 @@ public final class CraftingHandler {
                 Field f = knownCraftingContainer.get(name);
                 if (f == null) {
                     for (Field field : container.getClass().getDeclaredFields()) {
-                        if (field!=null && InventoryCrafting.class.isAssignableFrom(field.getClass())) {
+                        if (field!=null) {
                             try {
                                 field.setAccessible(true);
-                                InventoryCrafting craft = InventoryCrafting.class.cast(field.get(container));
-                                if(craft!=null){
+                                Object craft = field.get(container);
+                                if(craft instanceof InventoryCrafting){
                                     knownCraftingContainer.put(name, field);
-                                    return craft;
+                                    return (InventoryCrafting) craft;
                                 }
                             } catch (Exception ignored) {
                             }
@@ -59,7 +59,7 @@ public final class CraftingHandler {
                     notCraftingContainer.add(name);
                 } else {
                     try {
-                        return InventoryCrafting.class.cast(f.get(container));
+                        return (InventoryCrafting) f.get(container);
                     } catch (Exception ref) {
                         knownCraftingContainer.put(name, null);
                     }
@@ -120,12 +120,12 @@ public final class CraftingHandler {
             return ((ContainerWorkbench) container).craftResult;
         else if(notCraftingContainer!=null){
             for(Field field:container.getClass().getDeclaredFields()){
-                if(field != null && IInventory.class.isAssignableFrom(field.getClass())){
+                if(field != null){
                     try {
                         field.setAccessible(true);
-                        IInventory result = IInventory.class.cast(field.get(container));
-                        if (result!=null && result.getSizeInventory() == size) {
-                            return result;
+                        Object result = field.get(container);
+                        if (result instanceof IInventory && ((IInventory) result).getSizeInventory() == size) {
+                            return (IInventory) result;
                         }
                     }catch (Exception ignored){}
                 }
