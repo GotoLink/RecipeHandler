@@ -48,10 +48,10 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
 	@SubscribeEvent
 	public void onRenderGui(RenderGameOverlayEvent.Text event) {
 		if (getPlayer() != null && RecipeMod.cornerText) {
-            int result = CraftingHandler.getNumberOfCraft(getPlayer().openContainer, getWorld());
-            if (result > 1) {
-                event.getRight().add(I18n.translateToLocalFormatted("handler.found.text", result));
-            }
+			int result = CraftingHandler.getNumberOfCraft(getPlayer().openContainer, getWorld());
+			if (result > 1) {
+				event.getRight().add(I18n.translateToLocalFormatted("handler.found.text", result));
+			}
 		}
 	}
 
@@ -67,18 +67,16 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
                 } else if (pressed)
                     pressed = false;
             }
-            if(event.phase == TickEvent.Phase.END && Mouse.isButtonDown(0) && GuiScreen.isShiftKeyDown()){//Shift click
+            if(event.phase == TickEvent.Phase.END && Mouse.isButtonDown(0) && GuiScreen.isShiftKeyDown() && oldItem != null){//Shift click
                 IInventory result = CraftingHandler.getResultSlot(getPlayer().openContainer, 1);
-                if(result != null) {
-                    if(oldItem != null && !ItemStack.areItemStacksEqual(oldItem, result.getStackInSlot(0))){
-                        InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
-                        if(craft != null){
-                            ItemStack res = CraftingHandler.findMatchingRecipe(craft, getWorld());
-                            if(res != null){
-                                RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
-                            }
-                        }
-                    }
+                if(result != null && !ItemStack.areItemStacksEqual(oldItem, result.getStackInSlot(0))){
+					InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
+					if(craft != null){
+						ItemStack res = CraftingHandler.findMatchingRecipe(craft, getWorld());
+						if(res != null){
+							RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+						}
+					}
                 }
             }
         }
@@ -88,7 +86,9 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
         InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
         if (craft != null) {
             ItemStack res = CraftingHandler.findNextMatchingRecipe(craft, getWorld());
-            if (res != null && !ItemStack.areItemStacksEqual(res, oldItem)) {
+			if (res == null){
+				oldItem = null;
+			} else if (!ItemStack.areItemStacksEqual(res, oldItem)) {
                 RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
                 oldItem = res;
             }
