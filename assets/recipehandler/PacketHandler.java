@@ -1,13 +1,10 @@
 package assets.recipehandler;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.network.NetHandlerPlayServer;
-
-import java.util.Iterator;
 
 public final class PacketHandler implements RecipeMod.IRegister {
     @Override
@@ -19,13 +16,15 @@ public final class PacketHandler implements RecipeMod.IRegister {
         return null;
     }
 
+    @Override
+    public void scheduleTask(Runnable runner){
+
+    }
+
     @SubscribeEvent
     public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event){
-        ChangePacket message = new ChangePacket().fromBytes(event.getPacket().payload());
-        IInventory result = CraftingHandler.getResultSlot(RecipeMod.registry.getPlayer().openContainer, message.slot+1);
-        if (result != null) {
-            result.setInventorySlotContents(message.slot, message.itemstack.copy());
-        }
+        final ChangePacket message = new ChangePacket().fromBytes(event.getPacket().payload());
+        RecipeMod.registry.scheduleTask(message.getRun());
     }
 
     @SubscribeEvent

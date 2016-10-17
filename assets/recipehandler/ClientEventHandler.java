@@ -1,22 +1,23 @@
 package assets.recipehandler;
 
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.SlotCrafting;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -39,6 +40,11 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
     @Override
     public EntityPlayer getPlayer(){
         return FMLClientHandler.instance().getClientPlayerEntity();
+    }
+
+    @Override
+    public void scheduleTask(Runnable runner){
+        FMLClientHandler.instance().getClient().addScheduledTask(runner);
     }
 
     public static World getWorld(){
@@ -67,14 +73,26 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
                 } else if (pressed)
                     pressed = false;
             }
-            if(event.phase == TickEvent.Phase.END && Mouse.isButtonDown(0) && GuiScreen.isShiftKeyDown() && oldItem != null){//Shift click
-                IInventory result = CraftingHandler.getResultSlot(getPlayer().openContainer, 1);
-                if(result != null && !ItemStack.areItemStacksEqual(oldItem, result.getStackInSlot(0))){
+            if(event.phase == TickEvent.Phase.END && Mouse.isButtonDown(0) && GuiScreen.isShiftKeyDown()){//Shift click
+                Slot result = null;
+                if(FMLClientHandler.instance().getClient().currentScreen instanceof GuiContainer){
+                    Slot slot = ((GuiContainer) FMLClientHandler.instance().getClient().currentScreen).getSlotUnderMouse();
+                    if(slot == null) {
+                        return;
+                    }else if(slot instanceof SlotCrafting){
+                        result = slot;
+                    }
+                }
+                if(result == null) {
+                    result = CraftingHandler.getResultSlot(getPlayer().openContainer, 0);
+                }
+                if(result != null){
 					InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
 					if(craft != null){
 						ItemStack res = CraftingHandler.findMatchingRecipe(craft, getWorld());
-						if(res != null){
-							RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+						if(res != null && !ItemStack.areItemStacksEqual(res, result.getStack())){
+							RecipeMod.networkWrapper.sendToServer(new ChangePacket(result.slotNumber, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+                            oldItem = res;
 						}
 					}
                 }
@@ -89,7 +107,11 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
 			if (res == null){
 				oldItem = null;
 			} else if (!ItemStack.areItemStacksEqual(res, oldItem)) {
-                RecipeMod.networkWrapper.sendToServer(new ChangePacket(0, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+			    int index = 0;
+                Slot slot = CraftingHandler.getResultSlot(getPlayer().openContainer, index);
+                if(slot!= null)
+                    index = slot.slotNumber;
+                RecipeMod.networkWrapper.sendToServer(new ChangePacket(index, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
                 oldItem = res;
             }
         }

@@ -111,21 +111,25 @@ public final class CraftingHandler {
 		return arraylist;
 	}
 
-    public static IInventory getResultSlot(Container container, int size){
+    public static Slot getResultSlot(Container container, int index){
         if(container == null)
             return null;
-        else if (container instanceof ContainerPlayer)
-            return ((ContainerPlayer) container).craftResult;
-        else if (container instanceof ContainerWorkbench)
-            return ((ContainerWorkbench) container).craftResult;
-        else if(notCraftingContainer!=null){
+        else {
+            Slot slot = container.getSlot(index);
+            if(slot instanceof SlotCrafting)
+                return slot;
+        }
+        if(notCraftingContainer!=null){
             for(Field field:container.getClass().getDeclaredFields()){
                 if(field != null){
                     try {
                         field.setAccessible(true);
                         Object result = field.get(container);
-                        if (result instanceof IInventory && ((IInventory) result).getSizeInventory() == size) {
-                            return (IInventory) result;
+                        if (result instanceof IInventory && ((IInventory) result).getSizeInventory() > 0) {
+                            for(Slot slot: container.inventorySlots){
+                                if(slot instanceof SlotCrafting && slot.inventory == result)
+                                    return slot;
+                            }
                         }
                     }catch (Exception ignored){}
                 }
