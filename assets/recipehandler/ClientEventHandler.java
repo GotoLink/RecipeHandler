@@ -23,7 +23,7 @@ import org.lwjgl.input.Mouse;
 
 public final class ClientEventHandler implements RecipeMod.IRegister{
     private KeyBinding key;
-    private ItemStack oldItem = null;
+    private ItemStack oldItem = ItemStack.EMPTY;
     private boolean pressed = false;
 
     @Override
@@ -77,23 +77,23 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
                 Slot result = null;
                 if(FMLClientHandler.instance().getClient().currentScreen instanceof GuiContainer){
                     Slot slot = ((GuiContainer) FMLClientHandler.instance().getClient().currentScreen).getSlotUnderMouse();
-                    if(slot == null) {
+                    if(!(slot instanceof SlotCrafting))
                         return;
-                    }else if(slot instanceof SlotCrafting){
-                        result = slot;
+                    result = slot;
+                }
+                InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
+                if(craft != null){
+                    if(result == null) {
+                        result = CraftingHandler.getResultSlot(getPlayer().openContainer, craft, 0);
                     }
-                }
-                if(result == null) {
-                    result = CraftingHandler.getResultSlot(getPlayer().openContainer, 0);
-                }
-                if(result != null){
-					InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
-					if(craft != null){
-						ItemStack res = CraftingHandler.findMatchingRecipe(craft, getWorld());
-						if(res != null && !ItemStack.areItemStacksEqual(res, result.getStack())){
-							RecipeMod.networkWrapper.sendToServer(new ChangePacket(result.slotNumber, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+                    if(result != null){
+                        ItemStack res = CraftingHandler.findMatchingRecipe(craft, getWorld());
+                        if (res.isEmpty()){
+                            oldItem = ItemStack.EMPTY;
+                        } else if(!ItemStack.areItemStacksEqual(res, result.getStack())){
+                            RecipeMod.NETWORK.sendToServer(new ChangePacket(result.slotNumber, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
                             oldItem = res;
-						}
+                        }
 					}
                 }
             }
@@ -104,14 +104,14 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
         InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getPlayer().openContainer);
         if (craft != null) {
             ItemStack res = CraftingHandler.findNextMatchingRecipe(craft, getWorld());
-			if (res == null){
-				oldItem = null;
+			if (res.isEmpty()){
+				oldItem = ItemStack.EMPTY;
 			} else if (!ItemStack.areItemStacksEqual(res, oldItem)) {
 			    int index = 0;
-                Slot slot = CraftingHandler.getResultSlot(getPlayer().openContainer, index);
+                Slot slot = CraftingHandler.getResultSlot(getPlayer().openContainer, craft, index);
                 if(slot!= null)
                     index = slot.slotNumber;
-                RecipeMod.networkWrapper.sendToServer(new ChangePacket(index, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+                RecipeMod.NETWORK.sendToServer(new ChangePacket(index, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
                 oldItem = res;
             }
         }

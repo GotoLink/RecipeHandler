@@ -28,7 +28,7 @@ public final class GuiEventHandler {
         if(event.getGui() instanceof GuiContainer){
             InventoryCrafting craft = CraftingHandler.getCraftingMatrix(((GuiContainer) event.getGui()).inventorySlots);
             if (craft != null){
-                int guiLeft = (event.getGui().width + 176) / 2 + deltaX;
+                int guiLeft = (event.getGui().width + ((GuiContainer) event.getGui()).getXSize()) / 2 + deltaX;
                 int guiTop = (event.getGui().height) / 2;
                 event.getButtonList().add(new CreativeButton(event.getButtonList().size() + 2, guiLeft + RecipeMod.xOffset, guiTop + RecipeMod.yOffset));
             }
@@ -46,8 +46,9 @@ public final class GuiEventHandler {
         @Override
         public void drawButton(Minecraft mc, int mouseX, int mouseY){
             if (this.visible) {
-                displayString = String.valueOf(CraftingHandler.getNumberOfCraft(mc.thePlayer.openContainer, mc.theWorld));
-                enabled = !("0".equals(displayString));
+                int crafts = CraftingHandler.getNumberOfCraft(mc.player.openContainer, mc.world);
+                displayString = String.valueOf(crafts);
+                enabled = crafts > 1;
                 GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                 mc.renderEngine.bindTexture(this.texture);
                 int k = 176;

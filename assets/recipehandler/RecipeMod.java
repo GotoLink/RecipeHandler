@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -21,16 +22,12 @@ public final class RecipeMod {
     @SidedProxy(clientSide = "assets.recipehandler.ClientEventHandler", serverSide = "assets.recipehandler.PacketHandler")
     public static IRegister registry;
 	private static final boolean debug = false;
-    public static FMLEventChannel networkWrapper;
+    public static FMLEventChannel NETWORK;
     public static boolean switchKey = false, cycleButton = true, cornerText = false;
     public static int xOffset = 0, yOffset = 0;
 
 	@EventHandler
-	public void loading(FMLPreInitializationEvent event) {
-		if (debug) {
-			GameRegistry.addShapelessRecipe(new ItemStack(Items.GOLDEN_APPLE), Blocks.PLANKS, Items.STICK);
-			GameRegistry.addShapelessRecipe(new ItemStack(Items.APPLE), Blocks.PLANKS, Items.STICK);
-		}
+	public void preloading(FMLPreInitializationEvent event) {
 		if (event.getSide().isClient()) {
             if(event.getSourceFile().getName().endsWith(".jar")){
                 try {
@@ -61,10 +58,18 @@ public final class RecipeMod {
             if(config.hasChanged())
                 config.save();
         }catch (Throwable ignored){}
-        registry.register();
-        networkWrapper = NetworkRegistry.INSTANCE.newEventDrivenChannel(ChangePacket.CHANNEL);
-        networkWrapper.register(new PacketHandler());
+        NETWORK = NetworkRegistry.INSTANCE.newEventDrivenChannel(ChangePacket.CHANNEL);
+        NETWORK.register(new PacketHandler());
 	}
+
+    @EventHandler
+    public void loading(FMLInitializationEvent event) {
+        registry.register();
+        if (debug) {
+            GameRegistry.addShapelessRecipe(new ItemStack(Items.GOLDEN_APPLE), Blocks.PLANKS, Items.STICK);
+            GameRegistry.addShapelessRecipe(new ItemStack(Items.APPLE), Blocks.PLANKS, Items.STICK);
+        }
+    }
 
     interface IRegister{
         void register();

@@ -1,4 +1,11 @@
-<mod modid="recipemod">
+<mod modid="recipehandler">
+    <mcVersion version="1.11">
+        <release type="release" version="0.6"
+                 url="http://www.minecraftforum.net/topic/1651891-/#RecipeHandler"
+                 download="http://www.mediafire.com/file/4s4f57eblklhczy/NoMoreRecipeConflict-0.6%281.11%29.jar"
+                 md5="0F9BB682040B680A305EF2E8F2F0DEA4"
+        />
+    </mcVersion>
     <mcVersion version="1.10.2">
         <release type="release" version="0.5"
                  url="http://www.minecraftforum.net/topic/1651891-/#RecipeHandler"

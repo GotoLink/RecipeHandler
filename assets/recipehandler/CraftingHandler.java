@@ -5,13 +5,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 
 public final class CraftingHandler {
     private static HashMap<String, Field> knownCraftingContainer;
     private static HashSet<String> notCraftingContainer;
+    private static Field slotCraftInv;
     private static int previousNumberOfCraft;
     private static int delayTimer = 10;
     private static int recipeIndex;
@@ -19,6 +23,7 @@ public final class CraftingHandler {
     public static void enableGuessing(){
         knownCraftingContainer = new HashMap<String, Field>();
         notCraftingContainer = new HashSet<String>();
+        slotCraftInv = ReflectionHelper.findField(SlotCrafting.class, "field_75239_a", "craftMatrix");
     }
 
     public static int getRecipeIndex(){
@@ -31,6 +36,7 @@ public final class CraftingHandler {
         }
     }
 
+    @Nullable
     public static InventoryCrafting getCraftingMatrix(Container container){
         if(container == null)
             return null;
@@ -39,6 +45,11 @@ public final class CraftingHandler {
         else if (container instanceof ContainerWorkbench)
             return ((ContainerWorkbench) container).craftMatrix;
         else if(notCraftingContainer!=null){
+            for (Slot slot : container.inventorySlots) {
+                if (slot!=null && slot.inventory instanceof InventoryCrafting){
+                    return (InventoryCrafting) slot.inventory;
+                }
+            }
             String name = container.getClass().getName();
             if (!notCraftingContainer.contains(name)) {
                 Field f = knownCraftingContainer.get(name);
@@ -69,6 +80,7 @@ public final class CraftingHandler {
         return null;
     }
 
+    @Nonnull
     public static ItemStack findNextMatchingRecipe(InventoryCrafting craft, World world) {
         if (recipeIndex == Integer.MAX_VALUE) {
             recipeIndex = 0;
@@ -78,11 +90,12 @@ public final class CraftingHandler {
         return findMatchingRecipe(craft, world);
     }
 
+    @Nonnull
 	public static ItemStack findMatchingRecipe(InventoryCrafting craft, World world) {
-		if (CraftingManager.getInstance().findMatchingRecipe(craft, world) != null) {
+		if (!CraftingManager.getInstance().findMatchingRecipe(craft, world).isEmpty()) {
 			List<ItemStack> result = getCraftResult(craft, world);
 			if (result.size() == 0) {
-				return null;
+				return ItemStack.EMPTY;
 			}
 			if (recipeIndex < 0) {
 				int j1 = -recipeIndex;
@@ -96,7 +109,7 @@ public final class CraftingHandler {
 				return result.get(recipeIndex % result.size());
 			}
 		}
-		return null;
+		return ItemStack.EMPTY;
 	}
 
 	public static List<ItemStack> getCraftResult(InventoryCrafting craft, World world) {
@@ -111,29 +124,24 @@ public final class CraftingHandler {
 		return arraylist;
 	}
 
-    public static Slot getResultSlot(Container container, int index){
+    @Nullable
+    public static Slot getResultSlot(Container container, InventoryCrafting inventory, int index){
         if(container == null)
             return null;
-        else {
+        else if(index < container.inventorySlots.size()){
             Slot slot = container.getSlot(index);
             if(slot instanceof SlotCrafting)
                 return slot;
         }
-        if(notCraftingContainer!=null){
-            for(Field field:container.getClass().getDeclaredFields()){
-                if(field != null){
-                    try {
-                        field.setAccessible(true);
-                        Object result = field.get(container);
-                        if (result instanceof IInventory && ((IInventory) result).getSizeInventory() > 0) {
-                            for(Slot slot: container.inventorySlots){
-                                if(slot instanceof SlotCrafting && slot.inventory == result)
-                                    return slot;
-                            }
-                        }
-                    }catch (Exception ignored){}
+        if(slotCraftInv != null){
+            try {
+                for (Slot slot : container.inventorySlots) {
+                    if (slot instanceof SlotCrafting) {
+                        if (inventory == slotCraftInv.get(slot))
+                            return slot;
+                    }
                 }
-            }
+            }catch (Exception ignored){}
         }
         return null;
     }
