@@ -2,6 +2,7 @@ package assets.recipehandler;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryCrafting;
@@ -16,7 +17,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -53,7 +54,7 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
 
 	@SubscribeEvent
 	public void onRenderGui(RenderGameOverlayEvent.Text event) {
-		if (getPlayer() != null && RecipeMod.cornerText) {
+		if (RecipeMod.cornerText && getPlayer() != null) {
 			int result = CraftingHandler.getNumberOfCraft(getPlayer().openContainer, getWorld());
 			if (result > 1) {
 				event.getRight().add(I18n.translateToLocalFormatted("handler.found.text", result));
@@ -62,10 +63,10 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
 	}
 
     @SubscribeEvent
-    public void keyDown(TickEvent.ClientTickEvent event) {
-        if (getPlayer() != null && FMLClientHandler.instance().getClient().currentScreen != null) {
-            if(event.phase == TickEvent.Phase.START && key != null) {
-                if (Keyboard.isKeyDown(key.getKeyCode())) {
+    public void keyDown(InputEvent.MouseInputEvent event) {
+        if (FMLClientHandler.instance().getClient().currentScreen != null) {
+            if(key != null) {
+                if (GameSettings.isKeyDown(key)) {
                     if (!pressed) {
                         pressed = true;
                         pressed();
@@ -73,7 +74,7 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
                 } else if (pressed)
                     pressed = false;
             }
-            if(event.phase == TickEvent.Phase.END && Mouse.isButtonDown(0) && GuiScreen.isShiftKeyDown()){//Shift click
+            if(Mouse.isButtonDown(0) && GuiScreen.isShiftKeyDown()){//Shift click
                 Slot result = null;
                 if(FMLClientHandler.instance().getClient().currentScreen instanceof GuiContainer){
                     Slot slot = ((GuiContainer) FMLClientHandler.instance().getClient().currentScreen).getSlotUnderMouse();

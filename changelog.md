@@ -1,3 +1,7 @@
+== NoMoreRecipeConflict 0.7 ==
+* Switch key handling improved (support mouse keybind)
+* Disabled switch in creative inventory (option to enable)
+
 == NoMoreRecipeConflict 0.5 ==
 * Better support in potion effect shift
 * Fixed custom crafting table support
