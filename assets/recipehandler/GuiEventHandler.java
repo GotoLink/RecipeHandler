@@ -3,7 +3,11 @@ package assets.recipehandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiContainerCreative;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -27,10 +31,14 @@ public final class GuiEventHandler {
     public void onPostInitGui(GuiScreenEvent.InitGuiEvent.Post event){
         if(event.getGui() instanceof GuiContainer){
             InventoryCrafting craft = CraftingHandler.getCraftingMatrix(((GuiContainer) event.getGui()).inventorySlots);
-            if (craft != null){
+            if (craft != null || (RecipeMod.creativeCraft && event.getGui() instanceof GuiContainerCreative)){
                 int guiLeft = (event.getGui().width + ((GuiContainer) event.getGui()).getXSize()) / 2 + deltaX;
                 int guiTop = (event.getGui().height) / 2;
-                event.getButtonList().add(new CreativeButton(event.getButtonList().size() + 2, guiLeft + RecipeMod.xOffset, guiTop + RecipeMod.yOffset));
+                GuiButton button = new CreativeButton(event.getButtonList().size() + 2, guiLeft + RecipeMod.xOffset, guiTop + RecipeMod.yOffset);
+                event.getButtonList().add(button);
+                if(!RecipeMod.creativeCraft && event.getGui() instanceof GuiContainerCreative){
+                    event.getButtonList().remove(button);
+                }
             }
             deltaX = 0;
         }
@@ -45,12 +53,45 @@ public final class GuiEventHandler {
 
         @Override
         public void drawButton(Minecraft mc, int mouseX, int mouseY){
+            if(mc.currentScreen instanceof GuiContainerCreative){
+                this.visible = RecipeMod.creativeCraft && ((GuiContainerCreative) mc.currentScreen).getSelectedTabIndex() == CreativeTabs.INVENTORY.getTabIndex();
+            }
             if (this.visible) {
+                if(mc.currentScreen instanceof GuiContainerCreative){
+                    GuiContainerCreative creative = (GuiContainerCreative) mc.currentScreen;
+                    Slot slot;
+                    for(int i = 0; i < 4; i++) {
+                        //Move equip slots away
+                        slot = creative.inventorySlots.getSlot(i+5);
+                        slot.xPos = (i/2)*54;
+                        if(i<2)
+                            slot.xPos = 14;
+                        //Craft space
+                        slot = creative.inventorySlots.getSlot(i+1);
+                        slot.xPos = 108 + (i%2)*18;
+                        slot.yPos = 6 + (i/2)*18;
+                    }
+                    //Result slot
+                    slot = creative.inventorySlots.getSlot(0);
+                    slot.xPos = 164;
+                    slot.yPos = 16;
+                    //Render craft space
+                    GlStateManager.enableRescaleNormal();
+                    GlStateManager.enableDepth();
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                    mc.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/creative_inventory/tab_inventory.png"));
+                    creative.drawTexturedModalRect(creative.getGuiLeft() + 13, creative.getGuiTop() + 5, 107, 5, 18, 44);
+                    mc.getTextureManager().bindTexture(GuiContainer.INVENTORY_BACKGROUND);
+                    creative.drawTexturedModalRect(creative.getGuiLeft() + 106, creative.getGuiTop() + 3, 96, 15, 76, 47);
+                    GlStateManager.disableRescaleNormal();
+                    GlStateManager.disableDepth();
+                }
+                //Render craft switch
                 int crafts = CraftingHandler.getNumberOfCraft(mc.player.openContainer, mc.world);
                 displayString = String.valueOf(crafts);
                 enabled = crafts > 1;
                 GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.renderEngine.bindTexture(this.texture);
+                mc.getTextureManager().bindTexture(this.texture);
                 int k = 176;
                 if (!this.enabled)
                     k += this.width * 2;

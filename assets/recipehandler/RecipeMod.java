@@ -23,7 +23,7 @@ public final class RecipeMod {
     public static IRegister registry;
 	private static final boolean debug = false;
     public static FMLEventChannel NETWORK;
-    public static boolean switchKey = false, cycleButton = true, cornerText = false;
+    public static boolean switchKey = false, cycleButton = true, cornerText = false, creativeCraft = false;
     public static int xOffset = 0, yOffset = 0;
 
 	@EventHandler
@@ -55,6 +55,7 @@ public final class RecipeMod {
                 property.setComment("Offset for button from its default position, negative values to under, positive to over [default: 0]");
                 yOffset = property.getInt();
             }
+            creativeCraft = config.getBoolean("Enable Craft In Creative Inventory", Configuration.CATEGORY_CLIENT, creativeCraft, "Shows craft space in creative inventory tab");
             if(config.hasChanged())
                 config.save();
         }catch (Throwable ignored){}
