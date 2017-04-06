@@ -1,0 +1,4 @@
+
+@javax.annotation.ParametersAreNonnullByDefault
+@mcp.MethodsReturnNonnullByDefault
+package assets.recipehandler;
