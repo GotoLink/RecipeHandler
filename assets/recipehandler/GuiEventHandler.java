@@ -14,19 +14,32 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
+/**
+ * Deals with all the screen rendering
+ */
 public final class GuiEventHandler {
     public static final GuiEventHandler INSTANCE = new GuiEventHandler();
     private int deltaX = 0;
 
     private GuiEventHandler(){}
 
+    /**
+     * When potion effects apply, some screen shift
+     * Keep record of this event
+     * @param potionShift
+     */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onEffectInGui(GuiScreenEvent.PotionShiftEvent potionShift){
         if(potionShift.getGui() instanceof GuiContainer){
-            deltaX = 60;
+            deltaX = 60;//Default shift to the right
         }
     }
 
+    /**
+     * After the gui is opened and button list is initialized
+     * Add the switch button if a craft space is detected
+     * @param event
+     */
     @SubscribeEvent
     public void onPostInitGui(GuiScreenEvent.InitGuiEvent.Post event){
         if(event.getGui() instanceof GuiContainer){
@@ -44,6 +57,9 @@ public final class GuiEventHandler {
         }
     }
 
+    /**
+     * The switch button
+     */
     public final class CreativeButton extends GuiButton {
         private final ResourceLocation texture = new ResourceLocation("textures/gui/container/villager.png");
         private static final int WIDTH = 12, HEIGHT = WIDTH + 7;
@@ -57,6 +73,7 @@ public final class GuiEventHandler {
                 this.visible = RecipeMod.creativeCraft && ((GuiContainerCreative) mc.currentScreen).getSelectedTabIndex() == CreativeTabs.INVENTORY.getTabIndex();
             }
             if (this.visible) {
+                //Specific handling for the creative menu inventory tab
                 if(mc.currentScreen instanceof GuiContainerCreative){
                     GuiContainerCreative creative = (GuiContainerCreative) mc.currentScreen;
                     Slot slot;
@@ -75,12 +92,13 @@ public final class GuiEventHandler {
                     slot = creative.inventorySlots.getSlot(0);
                     slot.xPos = 164;
                     slot.yPos = 16;
-                    //Render craft space
                     GlStateManager.enableRescaleNormal();
                     GlStateManager.enableDepth();
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                    //Overlay the equip slots
                     mc.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/creative_inventory/tab_inventory.png"));
                     creative.drawTexturedModalRect(creative.getGuiLeft() + 13, creative.getGuiTop() + 5, 107, 5, 18, 44);
+                    //Render craft space
                     mc.getTextureManager().bindTexture(GuiContainer.INVENTORY_BACKGROUND);
                     creative.drawTexturedModalRect(creative.getGuiLeft() + 106, creative.getGuiTop() + 3, 96, 15, 76, 47);
                     GlStateManager.disableRescaleNormal();
@@ -88,19 +106,23 @@ public final class GuiEventHandler {
                 }
                 //Render craft switch
                 int crafts = CraftingHandler.getNumberOfCraft(mc.player.openContainer, mc.world);
-                displayString = String.valueOf(crafts);
                 enabled = crafts > 1;
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.getTextureManager().bindTexture(this.texture);
-                int k = 176;
-                if (!this.enabled)
-                    k += this.width * 2;
-                else if(super.mousePressed(mc, mouseX, mouseY))
-                    k += this.width;
-                this.drawTexturedModalRect(this.xPosition, this.yPosition, k, 0, this.width, this.height);
-                if(!RecipeMod.cornerText) {
-                    int l = this.enabled ? 0xFFFFFF : 10526880;
-                    this.drawCenteredString(mc.fontRendererObj, this.displayString, this.xPosition, this.yPosition + this.height / 2, l);
+                if(enabled || !RecipeMod.onlyNecessary) {
+                    //Render the 'villager choice' arrow
+                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    mc.getTextureManager().bindTexture(this.texture);
+                    int k = 176;
+                    if (!this.enabled)
+                        k += this.width * 2;
+                    else if (super.mousePressed(mc, mouseX, mouseY))
+                        k += this.width;
+                    this.drawTexturedModalRect(this.xPosition, this.yPosition, k, 0, this.width, this.height);
+                    //Render the number of crafts
+                    if (!RecipeMod.cornerText) {
+                        displayString = String.valueOf(crafts);
+                        int l = this.enabled ? 0xFFFFFF : 10526880;
+                        this.drawCenteredString(mc.fontRendererObj, this.displayString, this.xPosition, this.yPosition + this.height / 2, l);
+                    }
                 }
             }
         }

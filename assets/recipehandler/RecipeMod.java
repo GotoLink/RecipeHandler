@@ -3,6 +3,8 @@ package assets.recipehandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -17,13 +19,15 @@ import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import javax.annotation.Nullable;
+
 @Mod(modid = "recipehandler", name = "NoMoreRecipeConflict", version = "$version", acceptedMinecraftVersions = "&mcversion")
 public final class RecipeMod {
     @SidedProxy(clientSide = "assets.recipehandler.ClientEventHandler", serverSide = "assets.recipehandler.PacketHandler")
     public static IRegister registry;
 	private static final boolean debug = false;
     public static FMLEventChannel NETWORK;
-    public static boolean switchKey = false, cycleButton = true, cornerText = false, creativeCraft = false;
+    public static boolean switchKey = false, cycleButton = true, cornerText = false, creativeCraft = false, onlyNecessary = false;
     public static int xOffset = 0, yOffset = 0;
 
 	@EventHandler
@@ -40,6 +44,7 @@ public final class RecipeMod {
                 }
             }
 		}
+		//Setup the configuration file
         try{
             Configuration config = new Configuration(event.getSuggestedConfigurationFile());
             if(config.getBoolean("Enable Custom Crafting Detection", Configuration.CATEGORY_GENERAL, true, "Tries do detect other crafting systems, disable for less processing"))
@@ -54,27 +59,35 @@ public final class RecipeMod {
                 property = config.get(Configuration.CATEGORY_CLIENT, "Cycle Button Vertical Offset", 0);
                 property.setComment("Offset for button from its default position, negative values to under, positive to over [default: 0]");
                 yOffset = property.getInt();
+                onlyNecessary = config.getBoolean("Limit Button To Conflict", Configuration.CATEGORY_CLIENT, onlyNecessary, "Only render button in case of conflict");
             }
             creativeCraft = config.getBoolean("Enable Craft In Creative Inventory", Configuration.CATEGORY_CLIENT, creativeCraft, "Shows craft space in creative inventory tab");
             if(config.hasChanged())
                 config.save();
         }catch (Throwable ignored){}
+        //Setup network for packet handling
         NETWORK = NetworkRegistry.INSTANCE.newEventDrivenChannel(ChangePacket.CHANNEL);
         NETWORK.register(new PacketHandler());
 	}
 
     @EventHandler
     public void loading(FMLInitializationEvent event) {
+	    //Register client side event listeners
         registry.register();
-        if (debug) {
+        if (debug) {//Conflicting recipes for debugging
             GameRegistry.addShapelessRecipe(new ItemStack(Items.GOLDEN_APPLE), Blocks.PLANKS, Items.STICK);
             GameRegistry.addShapelessRecipe(new ItemStack(Items.APPLE), Blocks.PLANKS, Items.STICK);
         }
     }
 
+    /**
+     * Cover the client logic
+     */
     interface IRegister{
         void register();
+        @Nullable
         EntityPlayer getPlayer();
         void scheduleTask(Runnable runner);
+        void sendShift(InventoryCrafting crafting, Slot result);
     }
 }
