@@ -1,3 +1,8 @@
+== NoMoreRecipeConflict 0.8 ==
+* Made switch button internal delay more consistent
+* Added shift click behavior (keep shift key down to continue craft)
+* Added option to only show switch button when a conflict happens
+
 == NoMoreRecipeConflict 0.7 ==
 * Switch key handling improved (support mouse keybind)
 * Disabled switch in creative inventory (option to enable)

@@ -49,7 +49,7 @@ public final class PacketHandler implements RecipeMod.IRegister {
      */
     @SubscribeEvent
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event){
-        ChangePacket reply = new ChangePacket().fromBytes(event.getPacket().payload()).handle(((NetHandlerPlayServer) event.getHandler()).playerEntity);
+        ChangePacket reply = new ChangePacket().fromBytes(event.getPacket().payload()).handle(((NetHandlerPlayServer) event.getHandler()).player);
         if(reply != null) {
             event.setReply(reply.toProxy(Side.CLIENT));
             event.getReply().setDispatcher(event.getPacket().getDispatcher());

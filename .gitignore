@@ -7,4 +7,6 @@
 !pack.mcmeta
 !gradle*
 !update.xml
+!update.json
 !changelog.md
+!README.md

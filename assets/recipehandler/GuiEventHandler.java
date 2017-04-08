@@ -121,7 +121,7 @@ public final class GuiEventHandler {
                     if (!RecipeMod.cornerText) {
                         displayString = String.valueOf(crafts);
                         int l = this.enabled ? 0xFFFFFF : 10526880;
-                        this.drawCenteredString(mc.fontRendererObj, this.displayString, this.xPosition, this.yPosition + this.height / 2, l);
+                        this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition, this.yPosition + this.height / 2, l);
                     }
                 }
             }

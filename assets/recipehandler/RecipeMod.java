@@ -32,6 +32,7 @@ public final class RecipeMod {
 
 	@EventHandler
 	public void preloading(FMLPreInitializationEvent event) {
+	    event.getModMetadata().updateJSON = "https://raw.github.com/GotoLink/RecipeHandler/master/update.json";
 		if (event.getSide().isClient()) {
             if(event.getSourceFile().getName().endsWith(".jar")){
                 try {
