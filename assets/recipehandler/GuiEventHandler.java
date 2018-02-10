@@ -1,9 +1,12 @@
 package assets.recipehandler;
 
+import com.google.common.base.Predicates;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiButtonImage;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
+import net.minecraft.client.gui.recipebook.IRecipeShownListener;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.inventory.InventoryCrafting;
@@ -43,13 +46,15 @@ public final class GuiEventHandler {
     @SubscribeEvent
     public void onPostInitGui(GuiScreenEvent.InitGuiEvent.Post event){
         if(event.getGui() instanceof GuiContainer){
-            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(((GuiContainer) event.getGui()).inventorySlots);
-            if (craft != null || (RecipeMod.creativeCraft && event.getGui() instanceof GuiContainerCreative)){
-                int guiLeft = (event.getGui().width + ((GuiContainer) event.getGui()).getXSize()) / 2 + deltaX;
-                int guiTop = (event.getGui().height) / 2;
-                GuiButton button = new CreativeButton(event.getButtonList().size() + 2, guiLeft + RecipeMod.xOffset, guiTop + RecipeMod.yOffset);
+            final GuiContainer container = (GuiContainer) event.getGui();
+            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(container.inventorySlots);
+            if (craft != null || (RecipeMod.creativeCraft && container instanceof GuiContainerCreative)){
+                int guiTop = (container.height) / 2 + RecipeMod.yOffset;
+                CreativeButton button = new CreativeButton(event.getButtonList().size() + 2, 0, guiTop);
+                button.setupX(container);
+                button.x += deltaX;
                 event.getButtonList().add(button);
-                if(!RecipeMod.creativeCraft && event.getGui() instanceof GuiContainerCreative){
+                if(!RecipeMod.creativeCraft && container instanceof GuiContainerCreative){
                     event.getButtonList().remove(button);
                 }
             }
@@ -58,17 +63,34 @@ public final class GuiEventHandler {
     }
 
     /**
+     * After the recipe book button is pressed, screen can shift
+     * Shift the button according to new screen values
+     * @param event
+     */
+    @SubscribeEvent
+    public void onPostBookToggle(GuiScreenEvent.ActionPerformedEvent.Post event){
+        if(event.getButton() instanceof GuiButtonImage && event.getGui() instanceof GuiContainer && event.getGui() instanceof IRecipeShownListener){
+            final GuiContainer container = (GuiContainer) event.getGui();
+            event.getButtonList().stream().filter(Predicates.instanceOf(CreativeButton.class)).forEach(guiButton -> ((CreativeButton)guiButton).setupX(container) );
+        }
+    }
+
+    /**
      * The switch button
      */
-    public final class CreativeButton extends GuiButton {
+    final class CreativeButton extends GuiButton {
         private final ResourceLocation texture = new ResourceLocation("textures/gui/container/villager.png");
         private static final int WIDTH = 12, HEIGHT = WIDTH + 7;
         public CreativeButton(int id, int posX, int posY){
-            super(id, posX-WIDTH-3, posY-2*HEIGHT, WIDTH, HEIGHT, "0");
+            super(id, posX-WIDTH, posY-2*HEIGHT+3, WIDTH, HEIGHT, "0");
+        }
+
+        public void setupX(GuiContainer container){
+            this.x = container.getGuiLeft() + container.getXSize() + RecipeMod.xOffset - this.width - 3;
         }
 
         @Override
-        public void drawButton(Minecraft mc, int mouseX, int mouseY){
+        public void drawButton(Minecraft mc, int mouseX, int mouseY, float partTicks){
             if(mc.currentScreen instanceof GuiContainerCreative){
                 this.visible = RecipeMod.creativeCraft && ((GuiContainerCreative) mc.currentScreen).getSelectedTabIndex() == CreativeTabs.INVENTORY.getTabIndex();
             }
@@ -105,7 +127,7 @@ public final class GuiEventHandler {
                     GlStateManager.disableDepth();
                 }
                 //Render craft switch
-                int crafts = CraftingHandler.getNumberOfCraft(mc.player.openContainer, mc.world);
+                int crafts = CraftingHandler.getNumberOfCraft(mc.player.openContainer, mc.player.world);
                 enabled = crafts > 1;
                 if(enabled || !RecipeMod.onlyNecessary) {
                     //Render the 'villager choice' arrow
@@ -116,12 +138,12 @@ public final class GuiEventHandler {
                         k += this.width * 2;
                     else if (super.mousePressed(mc, mouseX, mouseY))
                         k += this.width;
-                    this.drawTexturedModalRect(this.xPosition, this.yPosition, k, 0, this.width, this.height);
+                    this.drawTexturedModalRect(this.x, this.y, k, 0, this.width, this.height);
                     //Render the number of crafts
                     if (!RecipeMod.cornerText) {
                         displayString = String.valueOf(crafts);
                         int l = this.enabled ? 0xFFFFFF : 10526880;
-                        this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition, this.yPosition + this.height / 2, l);
+                        this.drawCenteredString(mc.fontRenderer, this.displayString, this.x, this.y + this.height / 2, l);
                     }
                 }
             }
