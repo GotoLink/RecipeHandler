@@ -1,11 +1,13 @@
 package assets.recipehandler;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -20,6 +22,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 @Mod(modid = "recipehandler", name = "NoMoreRecipeConflict", version = "$version", acceptedMinecraftVersions = "&mcversion")
 public final class RecipeMod {
@@ -48,8 +51,9 @@ public final class RecipeMod {
 		//Setup the configuration file
         try{
             Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-            if(config.getBoolean("Enable Custom Crafting Detection", Configuration.CATEGORY_GENERAL, true, "Tries do detect other crafting systems, disable for less processing"))
-                CraftingHandler.enableGuessing();
+            if(config.getBoolean("Enable Custom Crafting Detection", Configuration.CATEGORY_GENERAL, true, "Tries do detect other crafting systems, disable for less processing")){
+                CraftingHandler.enableGuessing(Arrays.asList(config.getStringList("Black List Crafting Container", Configuration.CATEGORY_GENERAL, new String[]{"net.blay09.mods.cookingforblockheads.container.ContainerRecipeBook"}, "List of containers to ignore for custom crafting detection")));
+            }
             switchKey = config.getBoolean("Enable Switch Key", Configuration.CATEGORY_GENERAL, switchKey, "Can be modified in controls menu");
             cycleButton = config.getBoolean("Enable Cycle Button", Configuration.CATEGORY_GENERAL, cycleButton, "Rendered in the crafting GUI");
             cornerText = config.getBoolean("Render Text Tooltip", Configuration.CATEGORY_GENERAL, cornerText, "Rendered in the Top Right Corner of the screen");
@@ -76,8 +80,8 @@ public final class RecipeMod {
 	    //Register client side event listeners
         registry.register();
         if (debug) {//Conflicting recipes for debugging
-            GameRegistry.addShapelessRecipe(new ItemStack(Items.GOLDEN_APPLE), Blocks.PLANKS, Items.STICK);
-            GameRegistry.addShapelessRecipe(new ItemStack(Items.APPLE), Blocks.PLANKS, Items.STICK);
+            GameRegistry.addShapelessRecipe(new ResourceLocation("recipehandler:debug1"), new ResourceLocation("recipehandler:debug"), new ItemStack(Items.GOLDEN_APPLE), Ingredient.fromItem(Items.STICK));
+            GameRegistry.addShapelessRecipe(new ResourceLocation("recipehandler:debug2"), new ResourceLocation("recipehandler:debug"), new ItemStack(Items.APPLE), Ingredient.fromItem(Items.STICK));
         }
     }
 
@@ -90,5 +94,10 @@ public final class RecipeMod {
         EntityPlayer getPlayer();
         void scheduleTask(Runnable runner);
         void sendShift(InventoryCrafting crafting, Slot result);
+        /**
+         * @return The container the player has opened
+         */
+        @Nullable
+        default Container getContainer(){ return getPlayer()!=null ? getPlayer().openContainer : null;}
     }
 }
