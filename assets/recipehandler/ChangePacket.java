@@ -8,6 +8,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
@@ -89,17 +90,20 @@ public final class ChangePacket {
                  @Override
                  public ChangePacket call() {
                      InventoryCrafting crafting = CraftingHandler.getCraftingMatrix(player.openContainer);
-                     if(crafting!=null) {
+                     if(crafting != null) {
                          CraftingHandler.setRecipeIndex(index);
-                         ItemStack itr = CraftingHandler.findMatchingRecipe(crafting, player.getEntityWorld());
-                         if(ItemStack.areItemStacksEqual(itr, itemstack)) {
-                             Slot result = CraftingHandler.getResultSlot(player.openContainer, crafting, slot);
-                             if (result != null) {
-                                 result.putStack(itemstack.copy());
-                                 if(shift){
-                                     return new ChangePacket(slot, itemstack, index).setShift();
+                         IRecipe recipe = CraftingHandler.findMatchingRecipe(crafting, player.getEntityWorld());
+                         if(recipe != null) {
+                             ItemStack itr = recipe.getCraftingResult(crafting);
+                             if (ItemStack.areItemStacksEqual(itr, itemstack)) {
+                                 Slot result = CraftingHandler.getResultSlot(player.openContainer, crafting, slot);
+                                 if (result != null && CraftingHandler.setCraftUsed(player, recipe)) {
+                                     result.putStack(itemstack.copy());
+                                     if (shift) {
+                                         return new ChangePacket(slot, itemstack, index).setShift();
+                                     }
+                                     return new ChangePacket(slot, itemstack, index);
                                  }
-                                 return new ChangePacket(slot, itemstack, index);
                              }
                          }
                      }
@@ -108,9 +112,7 @@ public final class ChangePacket {
             });
             try {
                 return future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
@@ -135,20 +137,17 @@ public final class ChangePacket {
      * @return The runnable for client side
      */
     public Runnable getRun(){
-        return new Runnable() {
-            @Override
-            public void run() {
-                if(!itemstack.isEmpty()) {
-                    Container container = RecipeMod.registry.getPlayer().openContainer;
-                    InventoryCrafting crafting = CraftingHandler.getCraftingMatrix(container);
-                    if(crafting!=null) {
-                        Slot result = CraftingHandler.getResultSlot(container, crafting, slot);
-                        if (result != null) {
-                            result.putStack(itemstack);
-                            if(shift){
-                                CraftingHandler.setRecipeIndex(index);
-                                RecipeMod.registry.sendShift(crafting, result);
-                            }
+        return () -> {
+            if(!itemstack.isEmpty()) {
+                Container container = RecipeMod.registry.getContainer();
+                InventoryCrafting crafting = CraftingHandler.getCraftingMatrix(container);
+                if(crafting != null) {
+                    Slot result = CraftingHandler.getResultSlot(container, crafting, slot);
+                    if (result != null) {
+                        result.putStack(itemstack);
+                        if(shift){
+                            CraftingHandler.setRecipeIndex(index);
+                            RecipeMod.registry.sendShift(crafting, result);
                         }
                     }
                 }
