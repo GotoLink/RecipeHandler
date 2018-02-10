@@ -1,4 +1,18 @@
 <mod modid="recipehandler">
+    <mcVersion version="1.12.2">
+        <release type="release" version="0.10"
+                 url="http://www.minecraftforum.net/topic/1651891-/#RecipeHandler"
+                 download="https://minecraft.curseforge.com/projects/stimmedcow-nomorerecipeconflict/files/2529891"
+                 md5="5e02328f8375adc2c84b2d714327ce81"
+        />
+    </mcVersion>
+    <mcVersion version="1.12">
+        <release type="release" version="0.9"
+                 url="http://www.minecraftforum.net/topic/1651891-/#RecipeHandler"
+                 download="http://www.mediafire.com/file/vgs2fq27vmty22r/NoMoreRecipeConflict-0.9%281.12%29.jar"
+                 md5="189F15FC51792BFB2648F74BED05C37C"
+        />
+    </mcVersion>
     <mcVersion version="1.11.2">
         <release type="release" version="0.8"
                  url="http://www.minecraftforum.net/topic/1651891-/#RecipeHandler"

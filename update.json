@@ -1,12 +1,22 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/stimmedcow-nomorerecipeconflict/files",
   "promos": {
+    "1.12.2-latest": "0.10",
+    "1.12.2-recommended": "0.10",
+    "1.12-latest": "0.9",
+    "1.12-recommended": "0.9",
     "1.11.2-latest": "0.8",
     "1.11.2-recommended": "0.8",
     "1.11-latest": "0.8",
     "1.11-recommended": "0.7",
     "1.10.2-latest": "0.6",
     "1.10.2-recommended": "0.6"
+  },
+  "1.12.2": {
+    "0.10": "Fixed some NullPointerException - Added blacklist config for crafting container - Added recipe advancement support"
+  },
+  "1.12": {
+    "0.9": "Added screen support with recipe book"
   },
   "1.11.2": {
     "0.8": "Added option to only show switch button when a conflict happens - Added shift click behavior (keep shift key down to continue craft)",
@@ -20,7 +30,7 @@
   },
   "1.10.2": {
     "0.6": "Internal changes",
-    "0.5": "Added options to change switch buttnn position",
+    "0.5": "Added options to change switch button position",
     "0.4": "Made switch keybind support Forge key conflict handler"
   }
 }
