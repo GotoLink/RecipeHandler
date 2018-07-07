@@ -3,32 +3,29 @@ package assets.recipehandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import net.minecraftforge.common.crafting.IRecipeContainer;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public final class CraftingHandler {
     private static HashMap<String, Field> knownCraftingContainer;
     private static HashSet<String> notCraftingContainer;
     private static Field slotCraftInv;
-    private static int previousNumberOfCraft;
+    private static int previousNumberOfCraft = 0;
     private static long delayTimer = 0;
-    private static int recipeIndex;
+    private static int recipeIndex = 0;
 
     /**
      * Enable guessing work over the crafting inventory space
      */
     public static void enableGuessing(List<String> blackList){
-        knownCraftingContainer = new HashMap<String, Field>();
+        knownCraftingContainer = new HashMap<String, Field>(10);
         notCraftingContainer = new HashSet<String>(blackList);
         slotCraftInv = ReflectionHelper.findField(SlotCrafting.class, "field_75239_a", "craftMatrix");
     }
@@ -67,14 +64,14 @@ public final class CraftingHandler {
             return ((ContainerWorkbench) container).craftMatrix;
         else if (container instanceof IRecipeContainer)
             return ((IRecipeContainer) container).getCraftMatrix();
-        else if(notCraftingContainer!=null){
-            for (Slot slot : container.inventorySlots) {
-                if (slot != null && slot.inventory instanceof InventoryCrafting){
-                    return (InventoryCrafting) slot.inventory;
-                }
-            }
+        else if(notCraftingContainer != null){
             String name = container.getClass().getName();
             if (!notCraftingContainer.contains(name)) {
+                for (Slot slot : container.inventorySlots) {
+                    if (slot != null && slot.inventory instanceof InventoryCrafting){
+                        return (InventoryCrafting) slot.inventory;
+                    }
+                }
                 Field f = knownCraftingContainer.get(name);
                 if (f == null) {
                     for (Field field : container.getClass().getDeclaredFields()) {
@@ -142,25 +139,12 @@ public final class CraftingHandler {
         if(world == null)
             return null;
         List<IRecipe> result = getCrafts(craft, world);
-        if(previousNumberOfCraft!=result.size()) {
-            previousNumberOfCraft = result.size();
-            recipeIndex = 0;
-        }
         delayTimer = world.getTotalWorldTime();
         if (previousNumberOfCraft == 0) {
+            recipeIndex = 0;
             return null;
         }
-        if (recipeIndex < 0) {
-            int j1 = -recipeIndex;
-            j1 %= previousNumberOfCraft;
-            j1 = previousNumberOfCraft - j1;
-            if (j1 == previousNumberOfCraft) {
-                j1 = 0;
-            }
-            return result.get(j1);
-        } else {
-            return result.get(recipeIndex % previousNumberOfCraft);
-        }
+        return result.get(recipeIndex % previousNumberOfCraft);
     }
 
     /**
@@ -171,11 +155,12 @@ public final class CraftingHandler {
      */
 	public static List<IRecipe> getCrafts(InventoryCrafting craft, World world) {
 		ArrayList<IRecipe> arraylist = new ArrayList<IRecipe>();
-		for (IRecipe irecipe : CraftingManager.REGISTRY) {
+		for (IRecipe irecipe : ForgeRegistries.RECIPES) {
 			if (irecipe.matches(craft, world)) {
 				arraylist.add(irecipe);
 			}
 		}
+		previousNumberOfCraft = arraylist.size();
 		return arraylist;
 	}
 
@@ -230,6 +215,11 @@ public final class CraftingHandler {
         return null;
     }
 
+    /**
+     * Get the craft result inventory within the given container
+     * @param container Contains the craft space
+     * @return The crafting result inventory, or null if none could be found
+     */
     @Nullable
     public static InventoryCraftResult getResultInv(Container container){
         if (container instanceof ContainerPlayer)
@@ -259,11 +249,35 @@ public final class CraftingHandler {
         if(world.getTotalWorldTime() - delayTimer > 10) {
             delayTimer = world.getTotalWorldTime();
             InventoryCrafting craft = getCraftingMatrix(container);
-            if (craft != null)
-                previousNumberOfCraft = getCrafts(craft, world).size();
-            else
-                previousNumberOfCraft = 0;
+            if (craft != null && !craft.isEmpty()) {
+                InventoryCraftResult result = getResultInv(container);
+                if(result != null && result.isEmpty())
+                    reset();
+                else
+                    getCrafts(craft, world);
+            }else
+                reset();
         }
         return previousNumberOfCraft;
+    }
+
+    /**
+     * Reset the current state of the handler
+     */
+    private static void reset(){
+        if(previousNumberOfCraft != 0) {
+            previousNumberOfCraft = 0;
+            recipeIndex = 0;
+        }
+    }
+
+    /**
+     * Get current list of container names
+     * @param isCraft if true return the known crafting containers, if false, return the left-overs
+     * @return current list of container names, or null if guessing is disabled
+     */
+    @Nullable
+    public static Set<String> getContainers(boolean isCraft){
+        return isCraft ? knownCraftingContainer != null ? knownCraftingContainer.keySet() : null : notCraftingContainer;
     }
 }
