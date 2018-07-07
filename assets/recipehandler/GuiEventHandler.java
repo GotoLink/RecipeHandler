@@ -47,16 +47,31 @@ public final class GuiEventHandler {
     public void onPostInitGui(GuiScreenEvent.InitGuiEvent.Post event){
         if(event.getGui() instanceof GuiContainer){
             final GuiContainer container = (GuiContainer) event.getGui();
-            InventoryCrafting craft = CraftingHandler.getCraftingMatrix(container.inventorySlots);
-            if (craft != null || (RecipeMod.creativeCraft && container instanceof GuiContainerCreative)){
-                int guiTop = (container.height) / 2 + RecipeMod.yOffset;
-                CreativeButton button = new CreativeButton(event.getButtonList().size() + 2, 0, guiTop);
-                button.setupX(container);
+            int xOffset = RecipeMod.xOffset;
+            int yOffset = RecipeMod.yOffset;
+            CreativeButton button = null;
+            if(container instanceof GuiContainerCreative){//Special handling of creative craft space
+                if(!RecipeMod.creativeCraft)
+                    return;
+                xOffset += 166;
+                yOffset += 34;
+                button = new CreativeButton(event.getButtonList().size() + 2, xOffset, yOffset);
+            }
+            else {
+                InventoryCrafting craft = CraftingHandler.getCraftingMatrix(container.inventorySlots);
+                if (craft != null) {
+                    Slot slot = CraftingHandler.getResultSlot(container.inventorySlots, craft, 0);
+                    if (slot != null) {
+                        xOffset += slot.xPos + 2;
+                        yOffset += slot.yPos + 22;
+                        button = new CreativeButton(event.getButtonList().size(), xOffset, yOffset);
+                    }
+                }
+            }
+            if (button != null){
+                button.setupXY(container);
                 button.x += deltaX;
                 event.getButtonList().add(button);
-                if(!RecipeMod.creativeCraft && container instanceof GuiContainerCreative){
-                    event.getButtonList().remove(button);
-                }
             }
             deltaX = 0;
         }
@@ -71,7 +86,7 @@ public final class GuiEventHandler {
     public void onPostBookToggle(GuiScreenEvent.ActionPerformedEvent.Post event){
         if(event.getButton() instanceof GuiButtonImage && event.getGui() instanceof GuiContainer && event.getGui() instanceof IRecipeShownListener){
             final GuiContainer container = (GuiContainer) event.getGui();
-            event.getButtonList().stream().filter(Predicates.instanceOf(CreativeButton.class)).forEach(guiButton -> ((CreativeButton)guiButton).setupX(container) );
+            event.getButtonList().stream().filter(Predicates.instanceOf(CreativeButton.class)).forEach(guiButton -> ((CreativeButton)guiButton).setupXY(container) );
         }
     }
 
@@ -80,13 +95,17 @@ public final class GuiEventHandler {
      */
     final class CreativeButton extends GuiButton {
         private final ResourceLocation texture = new ResourceLocation("textures/gui/container/villager.png");
-        private static final int WIDTH = 12, HEIGHT = WIDTH + 7;
+        private static final int WIDTH = 12, HEIGHT = 16;
+        private final int xOffset, yOffset;
         public CreativeButton(int id, int posX, int posY){
-            super(id, posX-WIDTH, posY-2*HEIGHT+3, WIDTH, HEIGHT, "0");
+            super(id, posX, posY, WIDTH, HEIGHT, "0");
+            xOffset = posX;
+            yOffset = posY;
         }
 
-        public void setupX(GuiContainer container){
-            this.x = container.getGuiLeft() + container.getXSize() + RecipeMod.xOffset - this.width - 3;
+        public void setupXY(GuiContainer container){
+            this.x = container.getGuiLeft() + xOffset;
+            this.y = container.getGuiTop() + yOffset;
         }
 
         @Override
@@ -133,12 +152,12 @@ public final class GuiEventHandler {
                     //Render the 'villager choice' arrow
                     GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                     mc.getTextureManager().bindTexture(this.texture);
-                    int k = 176;
+                    int k = 177;
                     if (!this.enabled)
                         k += this.width * 2;
                     else if (super.mousePressed(mc, mouseX, mouseY))
                         k += this.width;
-                    this.drawTexturedModalRect(this.x, this.y, k, 0, this.width, this.height);
+                    this.drawTexturedModalRect(this.x, this.y, k, 2, this.width, this.height);
                     //Render the number of crafts
                     if (!RecipeMod.cornerText) {
                         displayString = String.valueOf(crafts);
