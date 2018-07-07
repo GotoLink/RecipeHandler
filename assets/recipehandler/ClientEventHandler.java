@@ -23,7 +23,6 @@ import javax.annotation.Nullable;
 
 public final class ClientEventHandler implements RecipeMod.IRegister{
     private KeyBinding key;
-    private ItemStack oldItem = ItemStack.EMPTY;
     private boolean pressed = false;
 
     /**
@@ -68,7 +67,7 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
     @Override
     public void sendShift(InventoryCrafting crafting, Slot slot){
         if (FMLClientHandler.instance().getClient().currentScreen instanceof GuiContainer && GuiScreen.isShiftKeyDown()) {
-            GuiContainer screen = (GuiContainer) FMLClientHandler.instance().getClient().currentScreen;
+            final GuiContainer screen = (GuiContainer) FMLClientHandler.instance().getClient().currentScreen;
             //Simulate left click
             ItemStack temp = FMLClientHandler.instance().getClient().playerController.windowClick(screen.inventorySlots.windowId, slot.slotNumber, 0, ClickType.QUICK_MOVE, getPlayer());
             ItemStack result = CraftingHandler.findCraftResult(crafting, getWorld());
@@ -126,14 +125,18 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
     @SubscribeEvent
     public void mouseDown(GuiScreenEvent.MouseInputEvent.Post event) {
         if(Mouse.getEventButton() == 0 && Mouse.getEventButtonState() && GuiScreen.isShiftKeyDown()){//Shift click
-            if(getPlayer() == null || CraftingHandler.getNumberOfCraft(getContainer(), getWorld()) < 2)//Not a conflict
+            if(getPlayer() == null) {
                 return;
+            }
             Slot result = null;
             if(event.getGui() instanceof GuiContainer){
                 Slot slot = ((GuiContainer) event.getGui()).getSlotUnderMouse();
                 if(!(slot instanceof SlotCrafting))//Other inventory event, don't mess it up
                     return;
                 result = slot;
+            }
+            if(CraftingHandler.getNumberOfCraft(getContainer(), getWorld()) < 2) {//Not a conflict
+                return;
             }
             InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getContainer());
             if(craft != null){
@@ -142,11 +145,8 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
                 }
                 if(result != null){
                     ItemStack res = CraftingHandler.findCraftResult(craft, getWorld());
-                    if (res.isEmpty()){
-                        oldItem = ItemStack.EMPTY;
-                    } else if(!ItemStack.areItemStacksEqual(res, result.getStack())){
+                    if (!res.isEmpty() && !ItemStack.areItemStacksEqual(res, result.getStack())){
                         RecipeMod.NETWORK.sendToServer(new ChangePacket(result.slotNumber, res, CraftingHandler.getRecipeIndex()).setShift().toProxy(Side.SERVER));
-                        oldItem = res;
                     }
                 }
             }
@@ -161,15 +161,11 @@ public final class ClientEventHandler implements RecipeMod.IRegister{
         InventoryCrafting craft = CraftingHandler.getCraftingMatrix(getContainer());
         if (craft != null) {
             ItemStack res = CraftingHandler.findNextMatchingRecipe(craft, getWorld());
-			if (res.isEmpty()){
-				oldItem = ItemStack.EMPTY;
-			} else if (!ItemStack.areItemStacksEqual(res, oldItem)) {
-			    int index = 0;//The default craft result slot index for containers
-                Slot slot = CraftingHandler.getResultSlot(getContainer(), craft, index);
-                if(slot != null)
-                    index = slot.slotNumber;
-                RecipeMod.NETWORK.sendToServer(new ChangePacket(index, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
-                oldItem = res;
+			if (!res.isEmpty()){
+                Slot slot = CraftingHandler.getResultSlot(getContainer(), craft, 0);
+                if(slot != null && !ItemStack.areItemStacksEqual(res, slot.getStack())){
+                    RecipeMod.NETWORK.sendToServer(new ChangePacket(slot.slotNumber, res, CraftingHandler.getRecipeIndex()).toProxy(Side.SERVER));
+                }
             }
         }
     }
