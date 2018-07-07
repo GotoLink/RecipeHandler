@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -51,8 +52,8 @@ public final class RecipeMod {
 		//Setup the configuration file
         try{
             Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-            if(config.getBoolean("Enable Custom Crafting Detection", Configuration.CATEGORY_GENERAL, true, "Tries do detect other crafting systems, disable for less processing")){
-                CraftingHandler.enableGuessing(Arrays.asList(config.getStringList("Black List Crafting Container", Configuration.CATEGORY_GENERAL, new String[]{"net.blay09.mods.cookingforblockheads.container.ContainerRecipeBook"}, "List of containers to ignore for custom crafting detection")));
+            if(config.getBoolean("Enable Custom Crafting Detection", Configuration.CATEGORY_GENERAL, true, "Tries to detect other crafting systems, disable for less processing")){
+                CraftingHandler.enableGuessing(Arrays.asList(config.getStringList("Black List Crafting Container", Configuration.CATEGORY_GENERAL, new String[]{"net.blay09.mods.cookingforblockheads.container.ContainerRecipeBook","morph.avaritia.container.ContainerExtremeCrafting"}, "List of containers to ignore for custom crafting detection")));
             }
             switchKey = config.getBoolean("Enable Switch Key", Configuration.CATEGORY_GENERAL, switchKey, "Can be modified in controls menu");
             cycleButton = config.getBoolean("Enable Cycle Button", Configuration.CATEGORY_GENERAL, cycleButton, "Rendered in the crafting GUI");
@@ -67,6 +68,10 @@ public final class RecipeMod {
                 onlyNecessary = config.getBoolean("Limit Button To Conflict", Configuration.CATEGORY_CLIENT, onlyNecessary, "Only render button in case of conflict");
             }
             creativeCraft = config.getBoolean("Enable Craft In Creative Inventory", Configuration.CATEGORY_CLIENT, creativeCraft, "Shows craft space in creative inventory tab");
+            if(config.getBoolean("Enable Furnace Recipes Tracking", Configuration.CATEGORY_GENERAL, false, "Tracks furnace recipes changes from the mod starting point")){
+                //Copy furnace recipes
+                FurnaceHandler.init();
+            }
             if(config.hasChanged())
                 config.save();
         }catch (Throwable ignored){}
@@ -83,6 +88,11 @@ public final class RecipeMod {
             GameRegistry.addShapelessRecipe(new ResourceLocation("recipehandler:debug1"), new ResourceLocation("recipehandler:debug"), new ItemStack(Items.GOLDEN_APPLE), Ingredient.fromItem(Items.STICK));
             GameRegistry.addShapelessRecipe(new ResourceLocation("recipehandler:debug2"), new ResourceLocation("recipehandler:debug"), new ItemStack(Items.APPLE), Ingredient.fromItem(Items.STICK));
         }
+    }
+
+    @EventHandler
+    public void serverStarting(FMLServerStartingEvent event){
+	    event.registerServerCommand(new RecipeCommand());
     }
 
     /**
