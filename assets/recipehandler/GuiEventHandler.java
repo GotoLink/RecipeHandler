@@ -13,6 +13,7 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
@@ -69,7 +70,6 @@ public final class GuiEventHandler {
                 }
             }
             if (button != null){
-                button.setupXY(container);
                 button.x += deltaX;
                 event.getButtonList().add(button);
             }
@@ -97,6 +97,7 @@ public final class GuiEventHandler {
         private final ResourceLocation texture = new ResourceLocation("textures/gui/container/villager.png");
         private static final int WIDTH = 12, HEIGHT = 16;
         private final int xOffset, yOffset;
+        private boolean firstDraw = true;
         public CreativeButton(int id, int posX, int posY){
             super(id, posX, posY, WIDTH, HEIGHT, "0");
             xOffset = posX;
@@ -111,9 +112,13 @@ public final class GuiEventHandler {
         @Override
         public void drawButton(Minecraft mc, int mouseX, int mouseY, float partTicks){
             if(mc.currentScreen instanceof GuiContainerCreative){
-                this.visible = RecipeMod.creativeCraft && ((GuiContainerCreative) mc.currentScreen).getSelectedTabIndex() == CreativeTabs.INVENTORY.getTabIndex();
+                this.visible = RecipeMod.creativeCraft && ((GuiContainerCreative) mc.currentScreen).getSelectedTabIndex() == CreativeTabs.INVENTORY.getIndex();
             }
             if (this.visible) {
+                if(firstDraw){
+                    setupXY((GuiContainer)mc.currentScreen);
+                    firstDraw = false;
+                }
                 //Specific handling for the creative menu inventory tab
                 if(mc.currentScreen instanceof GuiContainerCreative){
                     GuiContainerCreative creative = (GuiContainerCreative) mc.currentScreen;
@@ -147,6 +152,10 @@ public final class GuiEventHandler {
                 }
                 //Render craft switch
                 int crafts = CraftingHandler.getNumberOfCraft(mc.player.openContainer, mc.player.world);
+                if(crafts == -1) {
+                    enabled = false;
+                    return;
+                }
                 enabled = crafts > 1;
                 if(enabled || !RecipeMod.onlyNecessary) {
                     //Render the 'villager choice' arrow
