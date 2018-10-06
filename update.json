@@ -1,8 +1,8 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/stimmedcow-nomorerecipeconflict/files",
   "promos": {
-    "1.12.2-latest": "0.11",
-    "1.12.2-recommended": "0.11",
+    "1.12.2-latest": "0.12",
+    "1.12.2-recommended": "0.12",
     "1.12-latest": "0.9",
     "1.12-recommended": "0.9",
     "1.11.2-latest": "0.8",
@@ -13,6 +13,7 @@
     "1.10.2-recommended": "0.6"
   },
   "1.12.2": {
+    "0.12": "Improved modded tables support - Started AppliedEnergistics2 and EnderIO support - Improved position of switch in modded GUI",
     "0.11": "Added recipes commands - Fixed blacklist config not working in some cases - Fixed switch not switching in some cases - Improved output slot gui support",
     "0.10": "Fixed some NullPointerException - Added blacklist config for crafting container - Added recipe advancement support"
   },
