@@ -175,7 +175,7 @@ public class RecipeCommand extends CommandBase {
      * @return true if the two recipes are too similar to conflict
      */
     private static boolean areSameGroup(IRecipe recipeA, IRecipe recipeB){
-        return recipeA.getRegistryName().getResourceDomain().equals(recipeB.getRegistryName().getResourceDomain()) || emptyIngredients(recipeA.getIngredients()) || emptyIngredients(recipeB.getIngredients());
+        return recipeA.getRegistryName().getNamespace().equals(recipeB.getRegistryName().getNamespace()) || emptyIngredients(recipeA.getIngredients()) || emptyIngredients(recipeB.getIngredients());
     }
 
     /**

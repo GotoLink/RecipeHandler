@@ -85,7 +85,7 @@ public final class ChangePacket {
         //Check the packet data is correct
         if(!itemstack.isEmpty() && slot >= 0 && index >= 0) {
             //Send it to the server main thread
-            ListenableFuture<ChangePacket> future = player.mcServer.callFromMainThread(new Callable<ChangePacket>() {
+            ListenableFuture<ChangePacket> future = player.server.callFromMainThread(new Callable<ChangePacket>() {
                  @Nullable
                  @Override
                  public ChangePacket call() {
