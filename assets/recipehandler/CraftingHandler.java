@@ -5,9 +5,12 @@ import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.crafting.IRecipeContainer;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -16,7 +19,9 @@ import java.util.*;
 public final class CraftingHandler {
     private static HashMap<String, Field> knownCraftingContainer;
     private static HashSet<String> notCraftingContainer;
+    private static HashSet<ICompat> compatibilities = new HashSet<>(4);
     private static Field slotCraftInv;
+    private static ArrayList<IRecipe> crafts = new ArrayList<>(2);
     private static int previousNumberOfCraft = 0;
     private static long delayTimer = 0;
     private static int recipeIndex = 0;
@@ -28,6 +33,15 @@ public final class CraftingHandler {
         knownCraftingContainer = new HashMap<String, Field>(10);
         notCraftingContainer = new HashSet<String>(blackList);
         slotCraftInv = ReflectionHelper.findField(SlotCrafting.class, "field_75239_a", "craftMatrix");
+    }
+
+    /**
+     * Add a compatiblity module instance
+     * @param module The module to be added
+     * @return true if the module has been added, false otherwise
+     */
+    public static boolean addCompatibility(ICompat module){
+        return compatibilities.add(module);
     }
 
     /**
@@ -72,16 +86,20 @@ public final class CraftingHandler {
                         return (InventoryCrafting) slot.inventory;
                     }
                 }
+                for(ICompat mod : compatibilities){
+                    if(mod.getContainer().equals(name))
+                        return mod.getCraftInv(container);
+                }
                 Field f = knownCraftingContainer.get(name);
                 if (f == null) {
                     for (Field field : container.getClass().getDeclaredFields()) {
                         if (field != null) {
                             try {
                                 field.setAccessible(true);
-                                Object craft = field.get(container);
-                                if(craft instanceof InventoryCrafting){
+                                InventoryCrafting craft = convert(field.get(container));
+                                if(craft != null){
                                     knownCraftingContainer.put(name, field);
-                                    return (InventoryCrafting) craft;
+                                    return craft;
                                 }
                             } catch (Exception ignored) {
                             }
@@ -90,12 +108,28 @@ public final class CraftingHandler {
                     notCraftingContainer.add(name);
                 } else {
                     try {
-                        return (InventoryCrafting) f.get(container);
+                        return convert(f.get(container));
                     } catch (Exception ref) {
                         knownCraftingContainer.put(name, null);
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    @Nullable
+    private static InventoryCrafting convert(Object craft){
+        if(craft instanceof InventoryCrafting){
+            return (InventoryCrafting) craft;
+        }else if(craft instanceof IItemHandler && ((IItemHandler) craft).getSlots() == 9){
+            return CraftingSpace.ITEM_HANDLER.copy((IItemHandler) craft);
+        }else if(craft instanceof IInventory && ((IInventory) craft).getSizeInventory() == 9){
+            return CraftingSpace.INVENTORY.copy((IInventory) craft);
+        }else if(craft instanceof ICapabilityProvider){
+            IItemHandler handler = ((ICapabilityProvider) craft).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+            if(handler != null && handler.getSlots() == 9)
+                return CraftingSpace.ITEM_HANDLER.copy(handler);
         }
         return null;
     }
@@ -138,13 +172,13 @@ public final class CraftingHandler {
     public static IRecipe findMatchingRecipe(InventoryCrafting craft, @Nullable World world) {
         if(world == null)
             return null;
-        List<IRecipe> result = getCrafts(craft, world);
+        getCrafts(craft, world);
         delayTimer = world.getTotalWorldTime();
-        if (previousNumberOfCraft == 0) {
+        if (previousNumberOfCraft <= 0) {
             recipeIndex = 0;
             return null;
         }
-        return result.get(recipeIndex % previousNumberOfCraft);
+        return crafts.get(recipeIndex % previousNumberOfCraft);
     }
 
     /**
@@ -154,14 +188,16 @@ public final class CraftingHandler {
      * @return List of all the crafts, empty if none could be found
      */
 	public static List<IRecipe> getCrafts(InventoryCrafting craft, World world) {
-		ArrayList<IRecipe> arraylist = new ArrayList<IRecipe>();
-		for (IRecipe irecipe : ForgeRegistries.RECIPES) {
-			if (irecipe.matches(craft, world)) {
-				arraylist.add(irecipe);
-			}
-		}
-		previousNumberOfCraft = arraylist.size();
-		return arraylist;
+	    if(crafts.isEmpty() || !crafts.get(previousNumberOfCraft <= 0 ? 0:recipeIndex % previousNumberOfCraft).matches(craft, world)) {
+	        crafts.clear();
+            for (IRecipe irecipe : ForgeRegistries.RECIPES) {
+                if (irecipe.matches(craft, world)) {
+                    crafts.add(irecipe);
+                }
+            }
+        }
+        previousNumberOfCraft = crafts.size();
+		return crafts;
 	}
 
     /**
@@ -175,6 +211,17 @@ public final class CraftingHandler {
             InventoryCraftResult resultInv = getResultInv(player.openContainer);
             if(resultInv != null)
                 resultInv.setRecipeUsed(recipe);
+            else{
+                try{
+                    for(Field recF : player.openContainer.getClass().getDeclaredFields()) {
+                        if (recF.getType().equals(IRecipe.class)) {
+                            recF.setAccessible(true);
+                            recF.set(player.openContainer, recipe);
+                        }
+                    }
+                }catch (Throwable ignored){
+                }
+            }
             return true;
         }
         return false;
@@ -201,14 +248,19 @@ public final class CraftingHandler {
                 if(slot != null && slot.isHere(resultInv, slot.getSlotIndex()))
                     return slot;
             }
+        }else{
+            String type = container.getClass().getName();
+            for(ICompat mod : compatibilities){
+                if(mod.getContainer().equals(type)){
+                    return mod.getResultSlot(container);
+                }
+            }
         }
         if(slotCraftInv != null){
             try {
                 for (Slot slot : container.inventorySlots) {
-                    if (slot instanceof SlotCrafting) {
-                        if (inventory == slotCraftInv.get(slot))
-                            return slot;
-                    }
+                    if (slot instanceof SlotCrafting && inventory == slotCraftInv.get(slot))
+                        return slot;
                 }
             }catch (Exception ignored){}
         }
@@ -229,7 +281,7 @@ public final class CraftingHandler {
         else if (container instanceof IRecipeContainer)
             return ((IRecipeContainer) container).getCraftResult();
         for (Slot slot : container.inventorySlots) {
-            if(slot != null && slot.inventory instanceof InventoryCraftResult) {
+            if(slot != null && slot.inventory instanceof InventoryCraftResult){
                 return (InventoryCraftResult) slot.inventory;
             }
         }
@@ -245,18 +297,23 @@ public final class CraftingHandler {
      */
     public static int getNumberOfCraft(@Nullable Container container, @Nullable World world){
         if(world == null)
-            return 0;
+            return -1;
         if(world.getTotalWorldTime() - delayTimer > 10) {
             delayTimer = world.getTotalWorldTime();
             InventoryCrafting craft = getCraftingMatrix(container);
-            if (craft != null && !craft.isEmpty()) {
+            if(craft == null) {
+                previousNumberOfCraft = -1;
+                return -1;
+            }
+            //if (!craft.isEmpty()) {
                 InventoryCraftResult result = getResultInv(container);
                 if(result != null && result.isEmpty())
                     reset();
                 else
                     getCrafts(craft, world);
-            }else
+            /*}else {
                 reset();
+            }*/
         }
         return previousNumberOfCraft;
     }

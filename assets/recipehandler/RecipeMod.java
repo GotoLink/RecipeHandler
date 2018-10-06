@@ -10,11 +10,8 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -53,7 +50,7 @@ public final class RecipeMod {
         try{
             Configuration config = new Configuration(event.getSuggestedConfigurationFile());
             if(config.getBoolean("Enable Custom Crafting Detection", Configuration.CATEGORY_GENERAL, true, "Tries to detect other crafting systems, disable for less processing")){
-                CraftingHandler.enableGuessing(Arrays.asList(config.getStringList("Black List Crafting Container", Configuration.CATEGORY_GENERAL, new String[]{"net.blay09.mods.cookingforblockheads.container.ContainerRecipeBook","morph.avaritia.container.ContainerExtremeCrafting"}, "List of containers to ignore for custom crafting detection")));
+                CraftingHandler.enableGuessing(Arrays.asList(config.getStringList("Black List Crafting Container", Configuration.CATEGORY_GENERAL, new String[]{"net.blay09.mods.cookingforblockheads.container.ContainerRecipeBook","morph.avaritia.container.ContainerExtremeCrafting", "slimeknights.tconstruct.tools.common.inventory.ContainerPartBuilder", "slimeknights.tconstruct.tools.common.inventory.ContainerStencilTable"}, "List of containers to ignore for custom crafting detection")));
             }
             switchKey = config.getBoolean("Enable Switch Key", Configuration.CATEGORY_GENERAL, switchKey, "Can be modified in controls menu");
             cycleButton = config.getBoolean("Enable Cycle Button", Configuration.CATEGORY_GENERAL, cycleButton, "Rendered in the crafting GUI");
@@ -87,6 +84,14 @@ public final class RecipeMod {
         if (debug) {//Conflicting recipes for debugging
             GameRegistry.addShapelessRecipe(new ResourceLocation("recipehandler:debug1"), new ResourceLocation("recipehandler:debug"), new ItemStack(Items.GOLDEN_APPLE), Ingredient.fromItem(Items.STICK));
             GameRegistry.addShapelessRecipe(new ResourceLocation("recipehandler:debug2"), new ResourceLocation("recipehandler:debug"), new ItemStack(Items.APPLE), Ingredient.fromItem(Items.STICK));
+        }
+        if(Loader.isModLoaded("appliedenergistics2")){
+            CraftingHandler.addCompatibility(new AppliedEnergistics("ContainerCraftingTerm"));
+            CraftingHandler.addCompatibility(new AppliedEnergistics("ContainerPatternTerm"));
+        }
+        if(Loader.isModLoaded("enderiomachines")){
+            CraftingHandler.addCompatibility(new EnderIO("$Simple"));
+            CraftingHandler.addCompatibility(new EnderIO("$Normal"));
         }
     }
 
