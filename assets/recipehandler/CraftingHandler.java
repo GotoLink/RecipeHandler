@@ -17,19 +17,19 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public final class CraftingHandler {
-    private static HashMap<String, Field> knownCraftingContainer;
-    private static HashSet<String> notCraftingContainer;
-    private static HashSet<ICompat> compatibilities = new HashSet<>(4);
-    private static Field slotCraftInv;
-    private static ArrayList<IRecipe> crafts = new ArrayList<>(2);
-    private static int previousNumberOfCraft = 0;
-    private static long delayTimer = 0;
-    private static int recipeIndex = 0;
+    private HashMap<String, Field> knownCraftingContainer;
+    private HashSet<String> notCraftingContainer;
+    private HashSet<ICompat> compatibilities = new HashSet<>(4);
+    private Field slotCraftInv;
+    private ArrayList<IRecipe> crafts = new ArrayList<>(2);
+    private int previousNumberOfCraft = 0;
+    private long delayTimer = 0;
+    private int recipeIndex = 0;
 
     /**
      * Enable guessing work over the crafting inventory space
      */
-    public static void enableGuessing(List<String> blackList){
+    public void enableGuessing(List<String> blackList){
         knownCraftingContainer = new HashMap<String, Field>(10);
         notCraftingContainer = new HashSet<String>(blackList);
         slotCraftInv = ReflectionHelper.findField(SlotCrafting.class, "field_75239_a", "craftMatrix");
@@ -40,7 +40,7 @@ public final class CraftingHandler {
      * @param module The module to be added
      * @return true if the module has been added, false otherwise
      */
-    public static boolean addCompatibility(ICompat module){
+    public boolean addCompatibility(ICompat module){
         return compatibilities.add(module);
     }
 
@@ -48,7 +48,7 @@ public final class CraftingHandler {
      * The state of this helper
      * @return The craft index
      */
-    public static int getRecipeIndex(){
+    public int getRecipeIndex(){
         return recipeIndex;
     }
 
@@ -56,7 +56,7 @@ public final class CraftingHandler {
      * Apply new state to this helper
      * @param id The craft index
      */
-    public static void setRecipeIndex(int id){
+    public void setRecipeIndex(int id){
         if(id>=0){
             recipeIndex = id;
         }
@@ -69,7 +69,7 @@ public final class CraftingHandler {
      * @return The crafting space or null if none could be found
      */
     @Nullable
-    public static InventoryCrafting getCraftingMatrix(@Nullable Container container){
+    public InventoryCrafting getCraftingMatrix(@Nullable Container container){
         if(container == null)
             return null;
         else if (container instanceof ContainerPlayer)
@@ -119,7 +119,7 @@ public final class CraftingHandler {
     }
 
     @Nullable
-    private static InventoryCrafting convert(Object craft){
+    private InventoryCrafting convert(Object craft){
         if(craft instanceof InventoryCrafting){
             return (InventoryCrafting) craft;
         }else if(craft instanceof IItemHandler && ((IItemHandler) craft).getSlots() == 9){
@@ -140,7 +140,7 @@ public final class CraftingHandler {
      * @param world Where the craft happens
      * @return The next result of the craft
      */
-    public static ItemStack findNextMatchingRecipe(InventoryCrafting craft, @Nullable World world) {
+    public ItemStack findNextMatchingRecipe(InventoryCrafting craft, @Nullable World world) {
         if (recipeIndex == Integer.MAX_VALUE) {
             recipeIndex = 0;
         } else {
@@ -156,7 +156,7 @@ public final class CraftingHandler {
      * @param world Where the craft happens
      * @return The current result of the craft, EMPTY if none could be found
      */
-	public static ItemStack findCraftResult(InventoryCrafting craft, @Nullable World world) {
+	public ItemStack findCraftResult(InventoryCrafting craft, @Nullable World world) {
 	    IRecipe recipe = findMatchingRecipe(craft, world);
         return recipe != null ? recipe.getCraftingResult(craft) : ItemStack.EMPTY;
 	}
@@ -169,7 +169,7 @@ public final class CraftingHandler {
      * @return The current craft, null if none could be found
      */
 	@Nullable
-    public static IRecipe findMatchingRecipe(InventoryCrafting craft, @Nullable World world) {
+    public IRecipe findMatchingRecipe(InventoryCrafting craft, @Nullable World world) {
         if(world == null)
             return null;
         getCrafts(craft, world);
@@ -187,7 +187,7 @@ public final class CraftingHandler {
      * @param world Where the craft happens
      * @return List of all the crafts, empty if none could be found
      */
-	public static List<IRecipe> getCrafts(InventoryCrafting craft, World world) {
+	public void getCrafts(InventoryCrafting craft, World world) {
 	    if(crafts.isEmpty() || !crafts.get(previousNumberOfCraft <= 0 ? 0:recipeIndex % previousNumberOfCraft).matches(craft, world)) {
 	        crafts.clear();
             for (IRecipe irecipe : ForgeRegistries.RECIPES) {
@@ -197,7 +197,6 @@ public final class CraftingHandler {
             }
         }
         previousNumberOfCraft = crafts.size();
-		return crafts;
 	}
 
     /**
@@ -206,7 +205,7 @@ public final class CraftingHandler {
      * @param recipe the recipe to set
      * @return whether the recipe has actually been set
      */
-    public static boolean setCraftUsed(EntityPlayerMP player, IRecipe recipe){
+    public boolean setCraftUsed(EntityPlayerMP player, IRecipe recipe){
         if(recipe.isDynamic() || !player.getEntityWorld().getGameRules().getBoolean("doLimitedCrafting") || player.getRecipeBook().isUnlocked(recipe)){
             InventoryCraftResult resultInv = getResultInv(player.openContainer);
             if(resultInv != null)
@@ -236,7 +235,7 @@ public final class CraftingHandler {
      * @return The crafting result slot, or null if none could be found
      */
     @Nullable
-    public static Slot getResultSlot(Container container, InventoryCrafting inventory, int index){
+    public Slot getResultSlot(Container container, InventoryCrafting inventory, int index){
         if(index < container.inventorySlots.size()){
             Slot slot = container.getSlot(index);
             if(slot instanceof SlotCrafting)
@@ -273,7 +272,7 @@ public final class CraftingHandler {
      * @return The crafting result inventory, or null if none could be found
      */
     @Nullable
-    public static InventoryCraftResult getResultInv(Container container){
+    public InventoryCraftResult getResultInv(Container container){
         if (container instanceof ContainerPlayer)
             return ((ContainerPlayer) container).craftResult;
         else if (container instanceof ContainerWorkbench)
@@ -295,7 +294,7 @@ public final class CraftingHandler {
      * @param world Where the player crafts
      * @return The number of recipes that can be crafted
      */
-    public static int getNumberOfCraft(@Nullable Container container, @Nullable World world){
+    public int getNumberOfCraft(@Nullable Container container, @Nullable World world){
         if(world == null)
             return -1;
         if(world.getTotalWorldTime() - delayTimer > 10) {
@@ -305,15 +304,15 @@ public final class CraftingHandler {
                 previousNumberOfCraft = -1;
                 return -1;
             }
-            //if (!craft.isEmpty()) {
+            if (!craft.isEmpty()) {
                 InventoryCraftResult result = getResultInv(container);
                 if(result != null && result.isEmpty())
                     reset();
                 else
                     getCrafts(craft, world);
-            /*}else {
+            }else {
                 reset();
-            }*/
+            }
         }
         return previousNumberOfCraft;
     }
@@ -321,7 +320,7 @@ public final class CraftingHandler {
     /**
      * Reset the current state of the handler
      */
-    private static void reset(){
+    private void reset(){
         if(previousNumberOfCraft != 0) {
             previousNumberOfCraft = 0;
             recipeIndex = 0;
@@ -334,7 +333,7 @@ public final class CraftingHandler {
      * @return current list of container names, or null if guessing is disabled
      */
     @Nullable
-    public static Set<String> getContainers(boolean isCraft){
+    public Set<String> getContainers(boolean isCraft){
         return isCraft ? knownCraftingContainer != null ? knownCraftingContainer.keySet() : null : notCraftingContainer;
     }
 }

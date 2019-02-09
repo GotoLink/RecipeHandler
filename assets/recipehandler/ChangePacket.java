@@ -4,11 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
@@ -45,6 +41,13 @@ public final class ChangePacket {
         this.slot = slot;
         this.itemstack = stack;
         this.index = recipeIndex;
+    }
+
+    public ChangePacket(ChangePacket pkt) {
+        this.slot = pkt.slot;
+        this.itemstack = pkt.itemstack;
+        this.index = pkt.index;
+        this.shift = pkt.shift;
     }
 
     /**
@@ -89,25 +92,7 @@ public final class ChangePacket {
                  @Nullable
                  @Override
                  public ChangePacket call() {
-                     InventoryCrafting crafting = CraftingHandler.getCraftingMatrix(player.openContainer);
-                     if(crafting != null) {
-                         CraftingHandler.setRecipeIndex(index);
-                         IRecipe recipe = CraftingHandler.findMatchingRecipe(crafting, player.getEntityWorld());
-                         if(recipe != null) {
-                             ItemStack itr = recipe.getCraftingResult(crafting);
-                             if (ItemStack.areItemStacksEqual(itr, itemstack)) {
-                                 Slot result = CraftingHandler.getResultSlot(player.openContainer, crafting, slot);
-                                 if (result != null && CraftingHandler.setCraftUsed(player, recipe)) {
-                                     result.putStack(itemstack.copy());
-                                     if (shift) {
-                                         return new ChangePacket(slot, itemstack, index).setShift();
-                                     }
-                                     return new ChangePacket(slot, itemstack, index);
-                                 }
-                             }
-                         }
-                     }
-                     return null;
+                     return RecipeMod.registry.getAnswer(player, ChangePacket.this);
                  }
             });
             try {
@@ -132,26 +117,19 @@ public final class ChangePacket {
         return proxy;
     }
 
-    /**
-     *
-     * @return The runnable for client side
-     */
-    public Runnable getRun(){
-        return () -> {
-            if(!itemstack.isEmpty()) {
-                Container container = RecipeMod.registry.getContainer();
-                InventoryCrafting crafting = CraftingHandler.getCraftingMatrix(container);
-                if(crafting != null) {
-                    Slot result = CraftingHandler.getResultSlot(container, crafting, slot);
-                    if (result != null) {
-                        result.putStack(itemstack);
-                        if(shift){
-                            CraftingHandler.setRecipeIndex(index);
-                            RecipeMod.registry.sendShift(crafting, result);
-                        }
-                    }
-                }
-            }
-        };
+    public ItemStack stack(){
+        return itemstack;
+    }
+
+    public int slot(){
+        return slot;
+    }
+
+    public boolean isShift(){
+        return shift;
+    }
+
+    public int index(){
+        return index;
     }
 }

@@ -7,13 +7,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FurnaceHandler {
-    private static HashMap<ItemStack,ItemStack> FURNACE;
+    private final HashMap<ItemStack,ItemStack> FURNACE;
 
-    public static void init() {
-        FURNACE = new HashMap<ItemStack,ItemStack>(FurnaceRecipes.instance().getSmeltingList());
+    public FurnaceHandler(boolean active) {
+        if(active)
+            FURNACE = new HashMap<ItemStack,ItemStack>(FurnaceRecipes.instance().getSmeltingList());
+        else
+            FURNACE = null;
     }
 
-    public static int compare(){
+    public int compare(){
         if(FURNACE == null)
             return 0;
         int diff = 0;

@@ -48,20 +48,20 @@ public final class GuiEventHandler {
     public void onPostInitGui(GuiScreenEvent.InitGuiEvent.Post event){
         if(event.getGui() instanceof GuiContainer){
             final GuiContainer container = (GuiContainer) event.getGui();
-            int xOffset = RecipeMod.xOffset;
-            int yOffset = RecipeMod.yOffset;
+            int xOffset = ClientEventHandler.xOffset;
+            int yOffset = ClientEventHandler.yOffset;
             CreativeButton button = null;
             if(container instanceof GuiContainerCreative){//Special handling of creative craft space
-                if(!RecipeMod.creativeCraft)
+                if(!ClientEventHandler.creativeCraft)
                     return;
                 xOffset += 166;
                 yOffset += 34;
                 button = new CreativeButton(event.getButtonList().size() + 2, xOffset, yOffset);
             }
             else {
-                InventoryCrafting craft = CraftingHandler.getCraftingMatrix(container.inventorySlots);
+                InventoryCrafting craft = RecipeMod.registry.craftingHandler.getCraftingMatrix(container.inventorySlots);
                 if (craft != null) {
-                    Slot slot = CraftingHandler.getResultSlot(container.inventorySlots, craft, 0);
+                    Slot slot = RecipeMod.registry.craftingHandler.getResultSlot(container.inventorySlots, craft, 0);
                     if (slot != null) {
                         xOffset += slot.xPos + 2;
                         yOffset += slot.yPos + 22;
@@ -112,7 +112,7 @@ public final class GuiEventHandler {
         @Override
         public void drawButton(Minecraft mc, int mouseX, int mouseY, float partTicks){
             if(mc.currentScreen instanceof GuiContainerCreative){
-                this.visible = RecipeMod.creativeCraft && ((GuiContainerCreative) mc.currentScreen).getSelectedTabIndex() == CreativeTabs.INVENTORY.getIndex();
+                this.visible = ClientEventHandler.creativeCraft && ((GuiContainerCreative) mc.currentScreen).getSelectedTabIndex() == CreativeTabs.INVENTORY.getIndex();
             }
             if (this.visible) {
                 if(firstDraw){
@@ -151,13 +151,13 @@ public final class GuiEventHandler {
                     GlStateManager.disableDepth();
                 }
                 //Render craft switch
-                int crafts = CraftingHandler.getNumberOfCraft(mc.player.openContainer, mc.player.world);
+                int crafts = RecipeMod.registry.craftingHandler.getNumberOfCraft(mc.player.openContainer, mc.player.world);
                 if(crafts == -1) {
                     enabled = false;
                     return;
                 }
                 enabled = crafts > 1;
-                if(enabled || !RecipeMod.onlyNecessary) {
+                if(enabled || !ClientEventHandler.onlyNecessary) {
                     //Render the 'villager choice' arrow
                     GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                     mc.getTextureManager().bindTexture(this.texture);
@@ -168,7 +168,7 @@ public final class GuiEventHandler {
                         k += this.width;
                     this.drawTexturedModalRect(this.x, this.y, k, 2, this.width, this.height);
                     //Render the number of crafts
-                    if (!RecipeMod.cornerText) {
+                    if (!ClientEventHandler.cornerText) {
                         displayString = String.valueOf(crafts);
                         int l = this.enabled ? 0xFFFFFF : 10526880;
                         this.drawCenteredString(mc.fontRenderer, this.displayString, this.x, this.y + this.height / 2, l);
