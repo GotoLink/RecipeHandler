@@ -1,6 +1,7 @@
 /*
 
 !.gitignore
+!src/
 !assets/
 !build.gradle
 !mcmod.info

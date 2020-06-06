@@ -29,10 +29,6 @@ minecraft {
 	makeObfSourceJar = false
 }
 
-sourceSets.main.java {
-	srcDirs '.' include('assets/')
-}
-
 processResources {
 	// this will ensure that this task is redone when the versions change.
 	inputs.property "version", project.version
@@ -42,7 +38,7 @@ processResources {
 		// replace version and mcversion
 		expand([version: project.version, mcversion: "[1.12,)"])
 	}
-	from(fileTree('.').matching {
+	from(fileTree('src/main/resources').matching {
 		include('assets/**/*.lang')
 	})
 }
